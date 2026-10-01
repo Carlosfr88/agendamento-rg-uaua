@@ -1459,7 +1459,6 @@ def novo_administrador():
     return render_template(
         "admin/novo_administrador.html"
     )
-
 # ============================================================
 # IMPORTAÇÃO TEMPORÁRIA DOS DADOS
 # ============================================================
@@ -1504,7 +1503,6 @@ def importar_dados():
     try:
 
         conteudo = arquivo.read().decode("utf-8")
-
         dados = json.loads(conteudo)
 
     except Exception:
@@ -1543,32 +1541,21 @@ def importar_dados():
         horarios = dados["horarios"]
         agendamentos = dados["agendamentos"]
 
-        # ----------------------------------------------------
-        # VERIFICA SE O BANCO JÁ POSSUI DADOS
-        # ----------------------------------------------------
-
-        if (
-            User.query.count()
-            or Servico.query.count()
-            or HorarioDisponivel.query.count()
-            or Agendamento.query.count()
-        ):
-
-            flash(
-                "A importação foi bloqueada porque o banco já possui dados. "
-                "Isso evita duplicações.",
-                "danger"
-            )
-
-            return redirect(
-                url_for("admin.importar_dados")
-            )
-
-        # ----------------------------------------------------
+        # ====================================================
         # SERVIÇOS
-        # ----------------------------------------------------
+        # ====================================================
+
+        servicos_importados = 0
 
         for item in servicos:
+
+            existente = Servico.query.filter(
+                db.func.lower(Servico.nome)
+                == item["nome"].lower()
+            ).first()
+
+            if existente:
+                continue
 
             servico = Servico(
                 id=item["id"],
@@ -1578,17 +1565,26 @@ def importar_dados():
             )
 
             db.session.add(servico)
+            servicos_importados += 1
 
         db.session.flush()
 
-        # ----------------------------------------------------
+        # ====================================================
         # USUÁRIOS
-        # ----------------------------------------------------
+        # ====================================================
+
+        usuarios_importados = 0
 
         for item in usuarios:
 
+            existente = User.query.filter_by(
+                username=item["username"]
+            ).first()
+
+            if existente:
+                continue
+
             usuario = User(
-                id=item["id"],
                 nome=item["nome"],
                 username=item["username"],
                 password_hash=item["password_hash"],
@@ -1596,14 +1592,30 @@ def importar_dados():
             )
 
             db.session.add(usuario)
+            usuarios_importados += 1
 
         db.session.flush()
 
-        # ----------------------------------------------------
+        # ====================================================
         # HORÁRIOS
-        # ----------------------------------------------------
+        # ====================================================
+
+        horarios_importados = 0
 
         for item in horarios:
+
+            existente = (
+                HorarioDisponivel.query
+                .filter_by(
+                    servico_id=item["servico_id"],
+                    data=date.fromisoformat(item["data"]),
+                    hora=time.fromisoformat(item["hora"])
+                )
+                .first()
+            )
+
+            if existente:
+                continue
 
             horario = HorarioDisponivel(
                 id=item["id"],
@@ -1615,46 +1627,66 @@ def importar_dados():
             )
 
             db.session.add(horario)
+            horarios_importados += 1
 
         db.session.flush()
 
-        # ----------------------------------------------------
+        # ====================================================
         # AGENDAMENTOS
-        # ----------------------------------------------------
+        # ====================================================
+
+        agendamentos_importados = 0
 
         for item in agendamentos:
+
+            existente = Agendamento.query.filter_by(
+                protocolo=item["protocolo"]
+            ).first()
+
+            if existente:
+                continue
 
             criado_em = item.get("criado_em")
 
             if criado_em:
-
                 criado_em = datetime.fromisoformat(
                     criado_em
                 )
 
-            agendamento = Agendamento(
-                id=item["id"],
-                protocolo=item["protocolo"],
-                servico_id=item["servico_id"],
-                data=date.fromisoformat(item["data"]),
-                horario=time.fromisoformat(item["horario"]),
-                nome=item["nome"],
-                cpf=item["cpf"],
-                telefone=item.get("telefone"),
-                status=item.get(
+            dados_agendamento = {
+                "id": item["id"],
+                "protocolo": item["protocolo"],
+                "servico_id": item["servico_id"],
+                "data": date.fromisoformat(
+                    item["data"]
+                ),
+                "horario": time.fromisoformat(
+                    item["horario"]
+                ),
+                "nome": item["nome"],
+                "cpf": item["cpf"],
+                "telefone": item.get("telefone"),
+                "status": item.get(
                     "status",
                     "agendado"
-                ),
-                criado_em=criado_em
+                )
+            }
+
+            if criado_em:
+                dados_agendamento["criado_em"] = criado_em
+
+            agendamento = Agendamento(
+                **dados_agendamento
             )
 
             db.session.add(agendamento)
+            agendamentos_importados += 1
 
         db.session.flush()
 
-        # ----------------------------------------------------
-        # CORRIGE AS SEQUÊNCIAS DO POSTGRESQL
-        # ----------------------------------------------------
+        # ====================================================
+        # CORRIGE SEQUÊNCIAS DO POSTGRESQL
+        # ====================================================
 
         if db.engine.dialect.name == "postgresql":
 
@@ -1676,14 +1708,24 @@ def importar_dados():
                                 'id'
                             ),
                             COALESCE(
-                                (SELECT MAX(id) FROM {tabela}),
+                                (
+                                    SELECT MAX(id)
+                                    FROM {tabela}
+                                ),
                                 1
                             ),
-                            (SELECT COUNT(*) > 0 FROM {tabela})
+                            (
+                                SELECT COUNT(*) > 0
+                                FROM {tabela}
+                            )
                         )
                         """
                     )
                 )
+
+        # ====================================================
+        # CONFIRMA TUDO
+        # ====================================================
 
         db.session.commit()
 
@@ -1695,10 +1737,10 @@ def importar_dados():
         return render_template(
             "admin/importar_dados.html",
             concluido=True,
-            total_usuarios=len(usuarios),
-            total_servicos=len(servicos),
-            total_horarios=len(horarios),
-            total_agendamentos=len(agendamentos)
+            total_usuarios=usuarios_importados,
+            total_servicos=servicos_importados,
+            total_horarios=horarios_importados,
+            total_agendamentos=agendamentos_importados
         )
 
     except Exception as erro:
@@ -1711,13 +1753,14 @@ def importar_dados():
         )
 
         flash(
-            "A importação falhou. Nenhum dado foi gravado.",
+            "A importação falhou. Nenhum dado da operação foi gravado.",
             "danger"
         )
 
         return redirect(
             url_for("admin.importar_dados")
         )
+
 @admin_bp.route("/diagnostico-banco")
 @login_required
 def diagnostico_banco():
