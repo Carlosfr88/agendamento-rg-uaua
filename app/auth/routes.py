@@ -162,3 +162,21 @@ def recuperar_admin():
     return render_template(
         "auth/recuperar_admin.html"
     )    
+@auth_bp.route(
+    "/diagnostico-config"
+)
+def diagnostico_config():
+
+    import os
+
+    return {
+        "ADMIN_RECOVERY_KEY": bool(
+            os.getenv("ADMIN_RECOVERY_KEY")
+        ),
+        "RECOVERY_USERNAME": bool(
+            os.getenv("RECOVERY_USERNAME")
+        ),
+        "RECOVERY_PASSWORD": bool(
+            os.getenv("RECOVERY_PASSWORD")
+        )
+    }
