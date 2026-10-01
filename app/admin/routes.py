@@ -1,4 +1,7 @@
-from datetime import datetime, date
+from datetime import datetime, date, time
+import json
+
+from sqlalchemy import text
 
 from flask import (
     Blueprint,
@@ -1456,3 +1459,262 @@ def novo_administrador():
     return render_template(
         "admin/novo_administrador.html"
     )
+
+# ============================================================
+# IMPORTAÇÃO TEMPORÁRIA DOS DADOS
+# ============================================================
+
+@admin_bp.route(
+    "/importar-dados",
+    methods=["GET", "POST"]
+)
+@login_required
+def importar_dados():
+
+    if request.method == "GET":
+
+        return render_template(
+            "admin/importar_dados.html"
+        )
+
+    arquivo = request.files.get("arquivo")
+
+    if not arquivo:
+
+        flash(
+            "Selecione o arquivo de migração.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin.importar_dados")
+        )
+
+    if not arquivo.filename.lower().endswith(".json"):
+
+        flash(
+            "O arquivo deve estar no formato JSON.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin.importar_dados")
+        )
+
+    try:
+
+        conteudo = arquivo.read().decode("utf-8")
+
+        dados = json.loads(conteudo)
+
+    except Exception:
+
+        flash(
+            "Não foi possível ler o arquivo JSON.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin.importar_dados")
+        )
+
+    chaves_obrigatorias = {
+        "usuarios",
+        "servicos",
+        "horarios",
+        "agendamentos"
+    }
+
+    if not chaves_obrigatorias.issubset(dados.keys()):
+
+        flash(
+            "O arquivo não possui a estrutura esperada.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin.importar_dados")
+        )
+
+    try:
+
+        usuarios = dados["usuarios"]
+        servicos = dados["servicos"]
+        horarios = dados["horarios"]
+        agendamentos = dados["agendamentos"]
+
+        # ----------------------------------------------------
+        # VERIFICA SE O BANCO JÁ POSSUI DADOS
+        # ----------------------------------------------------
+
+        if (
+            User.query.count()
+            or Servico.query.count()
+            or HorarioDisponivel.query.count()
+            or Agendamento.query.count()
+        ):
+
+            flash(
+                "A importação foi bloqueada porque o banco já possui dados. "
+                "Isso evita duplicações.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin.importar_dados")
+            )
+
+        # ----------------------------------------------------
+        # SERVIÇOS
+        # ----------------------------------------------------
+
+        for item in servicos:
+
+            servico = Servico(
+                id=item["id"],
+                nome=item["nome"],
+                descricao=item.get("descricao"),
+                ativo=item.get("ativo", True)
+            )
+
+            db.session.add(servico)
+
+        db.session.flush()
+
+        # ----------------------------------------------------
+        # USUÁRIOS
+        # ----------------------------------------------------
+
+        for item in usuarios:
+
+            usuario = User(
+                id=item["id"],
+                nome=item["nome"],
+                username=item["username"],
+                password_hash=item["password_hash"],
+                ativo=item.get("ativo", True)
+            )
+
+            db.session.add(usuario)
+
+        db.session.flush()
+
+        # ----------------------------------------------------
+        # HORÁRIOS
+        # ----------------------------------------------------
+
+        for item in horarios:
+
+            horario = HorarioDisponivel(
+                id=item["id"],
+                servico_id=item["servico_id"],
+                data=date.fromisoformat(item["data"]),
+                hora=time.fromisoformat(item["hora"]),
+                capacidade=item["capacidade"],
+                ativo=item.get("ativo", True)
+            )
+
+            db.session.add(horario)
+
+        db.session.flush()
+
+        # ----------------------------------------------------
+        # AGENDAMENTOS
+        # ----------------------------------------------------
+
+        for item in agendamentos:
+
+            criado_em = item.get("criado_em")
+
+            if criado_em:
+
+                criado_em = datetime.fromisoformat(
+                    criado_em
+                )
+
+            agendamento = Agendamento(
+                id=item["id"],
+                protocolo=item["protocolo"],
+                servico_id=item["servico_id"],
+                data=date.fromisoformat(item["data"]),
+                horario=time.fromisoformat(item["horario"]),
+                nome=item["nome"],
+                cpf=item["cpf"],
+                telefone=item.get("telefone"),
+                status=item.get(
+                    "status",
+                    "agendado"
+                ),
+                criado_em=criado_em
+            )
+
+            db.session.add(agendamento)
+
+        db.session.flush()
+
+        # ----------------------------------------------------
+        # CORRIGE AS SEQUÊNCIAS DO POSTGRESQL
+        # ----------------------------------------------------
+
+        if db.engine.dialect.name == "postgresql":
+
+            tabelas = [
+                "users",
+                "servicos",
+                "horarios_disponiveis",
+                "agendamentos"
+            ]
+
+            for tabela in tabelas:
+
+                db.session.execute(
+                    text(
+                        f"""
+                        SELECT setval(
+                            pg_get_serial_sequence(
+                                '{tabela}',
+                                'id'
+                            ),
+                            COALESCE(
+                                (SELECT MAX(id) FROM {tabela}),
+                                1
+                            ),
+                            (SELECT COUNT(*) > 0 FROM {tabela})
+                        )
+                        """
+                    )
+                )
+
+        db.session.commit()
+
+        flash(
+            "Migração concluída com sucesso.",
+            "success"
+        )
+
+        return render_template(
+            "admin/importar_dados.html",
+            concluido=True,
+            total_usuarios=len(usuarios),
+            total_servicos=len(servicos),
+            total_horarios=len(horarios),
+            total_agendamentos=len(agendamentos)
+        )
+
+    except Exception as erro:
+
+        db.session.rollback()
+
+        print(
+            "ERRO NA IMPORTAÇÃO:",
+            erro
+        )
+
+        flash(
+            "A importação falhou. Nenhum dado foi gravado.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin.importar_dados")
+        )    

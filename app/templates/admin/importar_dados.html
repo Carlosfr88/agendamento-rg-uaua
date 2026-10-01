@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}
+Importação de Dados
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4">
+
+                    <h2 class="mb-3">
+                        Importação de Dados
+                    </h2>
+
+                    {% if concluido %}
+
+                        <div class="alert alert-success">
+
+                            <h5 class="mb-3">
+                                Migração concluída
+                            </h5>
+
+                            <p class="mb-1">
+                                Usuários:
+                                <strong>{{ total_usuarios }}</strong>
+                            </p>
+
+                            <p class="mb-1">
+                                Serviços:
+                                <strong>{{ total_servicos }}</strong>
+                            </p>
+
+                            <p class="mb-1">
+                                Horários:
+                                <strong>{{ total_horarios }}</strong>
+                            </p>
+
+                            <p class="mb-0">
+                                Agendamentos:
+                                <strong>{{ total_agendamentos }}</strong>
+                            </p>
+
+                        </div>
+
+                        <div class="alert alert-warning mt-3">
+
+                            Esta ferramenta é temporária.
+                            Após confirmar os dados no sistema,
+                            ela deverá ser removida.
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="alert alert-warning">
+
+                            <strong>Atenção:</strong>
+
+                            esta ferramenta deve ser utilizada
+                            somente uma vez para migrar os dados
+                            do sistema local para o PostgreSQL.
+
+                        </div>
+
+                        <form
+                            method="POST"
+                            enctype="multipart/form-data"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token() }}"
+                            >
+
+                            <div class="mb-4">
+
+                                <label
+                                    for="arquivo"
+                                    class="form-label"
+                                >
+                                    Arquivo de migração
+                                </label>
+
+                                <input
+                                    type="file"
+                                    class="form-control"
+                                    id="arquivo"
+                                    name="arquivo"
+                                    accept=".json"
+                                    required
+                                >
+
+                                <div class="form-text">
+                                    Selecione o arquivo
+                                    dados_migracao.json
+                                </div>
+
+                            </div>
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                Importar dados
+                            </button>
+
+                        </form>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

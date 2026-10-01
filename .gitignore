@@ -7,3 +7,4 @@ instance/*.db
 .pytest_cache/
 .vscode/
 .idea/
+dados_migracao.json
