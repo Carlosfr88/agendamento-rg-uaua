@@ -1223,9 +1223,12 @@ def administradores():
         .all()
     )
 
-    
+    return render_template(
+        "admin/administradores.html",
+        administradores=administradores
+    )
 
-
+ 
 # ============================================================
 # NOVO ADMINISTRADOR
 # ============================================================
