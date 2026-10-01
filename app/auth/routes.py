@@ -1,4 +1,5 @@
 import os
+from ..extensions import db
 
 from flask import (
     Blueprint,
