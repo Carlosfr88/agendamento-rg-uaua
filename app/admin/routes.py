@@ -1717,4 +1717,14 @@ def importar_dados():
 
         return redirect(
             url_for("admin.importar_dados")
-        )    
+        )
+@admin_bp.route("/diagnostico-banco")
+@login_required
+def diagnostico_banco():
+
+    return {
+        "usuarios": User.query.count(),
+        "servicos": Servico.query.count(),
+        "horarios": HorarioDisponivel.query.count(),
+        "agendamentos": Agendamento.query.count()
+    }            
