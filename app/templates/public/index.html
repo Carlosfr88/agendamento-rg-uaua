@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>Agendamento RG/CIN - SEDES Uauá</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+```
+
+</head>
+
+<body>
+
+```
+<header class="topbar">
+    <div class="container topbar-content">
+        <div class="brand">
+            <span class="brand-title">SEDES</span>
+            <span class="brand-subtitle">
+                Secretaria de Desenvolvimento Social e Combate à Pobreza
+            </span>
+        </div>
+
+        <a href="{{ url_for('auth.login') }}" class="btn-login">
+            Área do Servidor
+        </a>
+    </div>
+</header>
+
+<main>
+
+    <section class="hero">
+        <div class="container hero-content">
+
+            <div class="hero-text">
+                <span class="eyebrow">PREFEITURA MUNICIPAL DE UAUÁ</span>
+
+                <h1>
+                    Agendamento de RG/CIN
+                </h1>
+
+                <p>
+                    Agende seu atendimento para emissão ou atualização
+                    do seu documento de identificação de forma rápida,
+                    simples e segura.
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="{{ url_for('public.agendamento') }}" class="btn-primary">
+                        Novo Agendamento
+                    </a>
+
+                    <a href="{{ url_for('public.consultar_agendamento') }}"
+                    class="btn-secondary">
+
+                        Consultar Agendamento
+
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <section class="services">
+        <div class="container">
+
+            <div class="section-header">
+                <span class="eyebrow">SERVIÇOS</span>
+
+                <h2>
+                    Atendimento de RG/CIN
+                </h2>
+
+                <p>
+                    Escolha uma opção para continuar.
+                </p>
+            </div>
+
+
+            <div class="cards">
+
+                <div class="card">
+                    <div class="card-icon">01</div>
+
+                    <h3>Novo Agendamento</h3>
+
+                    <p>
+                        Escolha a data e o horário disponíveis
+                        para realizar seu atendimento.
+                    </p>
+
+                    <a href="{{ url_for('public.agendamento') }}" class="card-link">
+                        Agendar atendimento →
+                    </a>
+                </div>
+
+
+                <div class="card">
+                    <div class="card-icon">02</div>
+
+                    <h3>Consultar Agendamento</h3>
+
+                    <p>
+                        Consulte os dados, data e horário do seu
+                        atendimento utilizando seu protocolo.
+                    </p>
+
+                    <a href="{{ url_for('public.consultar_agendamento') }}"
+                        class="card-link">
+
+                        Consultar →
+
+                    </a>
+                </div>
+
+
+                <div class="card">
+                    <div class="card-icon">03</div>
+
+                    <h3>Informações</h3>
+
+                    <p>
+                        Confira documentos necessários e orientações
+                        para o atendimento.
+                    </p>
+
+                    <a href="#" class="card-link">
+                        Ver informações →
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+
+<footer class="footer">
+    <div class="container">
+
+        <strong>
+            Prefeitura Municipal de Uauá
+        </strong>
+
+        <span>
+            Secretaria de Desenvolvimento Social e Combate à Pobreza — SEDES
+        </span>
+
+    </div>
+</footer>
+```
+
+</body>
+</html>

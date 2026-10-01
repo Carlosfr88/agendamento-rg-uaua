@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+```
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Novo Agendamento - RG/CIN | SEDES Uauá</title>
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}">
+```
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+```
+<div class="container topbar-content">
+
+    <div class="brand">
+
+        <span class="brand-title">
+            SEDES
+        </span>
+
+        <span class="brand-subtitle">
+            Secretaria de Desenvolvimento Social e Combate à Pobreza
+        </span>
+
+    </div>
+
+    <a href="{{ url_for('public.index') }}"
+       class="btn-login">
+
+        Voltar
+
+    </a>
+
+</div>
+```
+
+</header>
+
+<main>
+
+<section class="services">
+
+```
+<div class="container">
+
+    <div class="section-header">
+
+        <span class="eyebrow">
+            NOVO AGENDAMENTO
+        </span>
+
+        <h2>
+            Agendamento de RG/CIN
+        </h2>
+
+        <p>
+            Selecione o serviço desejado para continuar.
+        </p>
+
+    </div>
+
+
+    <div class="cards">
+
+        {% for servico in servicos %}
+    
+        <div class="card">
+    
+            <div class="card-icon">
+                {{ "%02d"|format(loop.index) }}
+            </div>
+    
+            <h3>
+                {{ servico.nome }}
+            </h3>
+    
+            <p>
+                {{ servico.descricao }}
+            </p>
+    
+            <a href="{{ url_for('public.agendamento_data', servico_id=servico.id) }}"
+               class="btn-primary">
+    
+                Selecionar
+    
+            </a>
+    
+        </div>
+    
+        {% endfor %}
+    
+    </div>
+```
+
+</section>
+
+</main>
+
+<footer class="footer">
+
+```
+<div class="container">
+
+    <strong>
+        Prefeitura Municipal de Uauá
+    </strong>
+
+    <span>
+        Secretaria de Desenvolvimento Social e Combate à Pobreza — SEDES
+    </span>
+
+</div>
+```
+
+</footer>
+
+</body>
+
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+```
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>
+    Agendamento confirmado - SEDES Uauá
+</title>
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}">
+
+<style>
+
+    .success-wrapper {
+        max-width: 750px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
+
+    .success-card {
+        background: #ffffff;
+        border: 1px solid #e1e6eb;
+        border-radius: 14px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+    }
+
+    .success-icon {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e8f5f1;
+        color: #1f7a8c;
+        font-size: 36px;
+        font-weight: 700;
+    }
+
+    .success-card h1 {
+        margin: 0 0 10px;
+        color: #123b5d;
+    }
+
+    .success-card > p {
+        color: #65717d;
+        margin-bottom: 30px;
+    }
+
+    .protocol-box {
+        background: #f5f7fa;
+        border: 1px solid #e1e6eb;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .protocol-label {
+        display: block;
+        color: #65717d;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .protocol {
+        display: block;
+        color: #123b5d;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .details {
+        text-align: left;
+        border-top: 1px solid #e1e6eb;
+        padding-top: 20px;
+    }
+
+    .detail {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f2f4;
+    }
+
+    .detail span {
+        color: #65717d;
+    }
+
+    .detail strong {
+        color: #17212b;
+        text-align: right;
+    }
+
+    .success-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        font-size: 14px;
+    }
+
+    .btn-primary {
+        background: #123b5d;
+        color: #ffffff;
+    }
+
+    .btn-primary:hover {
+        background: #0b2941;
+    }
+
+    .btn-secondary {
+        background: #f1f4f6;
+        color: #123b5d;
+        border: 1px solid #dce2e7;
+    }
+
+    .btn-secondary:hover {
+        background: #e7ecef;
+    }
+
+    .important {
+        margin-top: 25px;
+        padding: 15px;
+        border-radius: 8px;
+        background: #fff8e8;
+        color: #6b571e;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .protocol-copy {
+        margin-top: 12px;
+        padding: 8px 14px;
+        border: 1px solid #dce2e7;
+        border-radius: 7px;
+        background: #ffffff;
+        color: #123b5d;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .protocol-copy:hover {
+        background: #f5f7fa;
+    }
+
+    @media print {
+
+        body {
+            background: #ffffff !important;
+        }
+
+        .success-wrapper {
+            margin: 0 auto;
+            max-width: 750px;
+        }
+
+        .success-card {
+            box-shadow: none;
+            border: 1px solid #cccccc;
+        }
+
+        .success-actions,
+        .protocol-copy {
+            display: none !important;
+        }
+
+        .important {
+            border: 1px solid #dddddd;
+            background: #ffffff;
+        }
+
+        .footer {
+            display: none;
+        }
+
+    }
+
+    @media (max-width: 600px) {
+
+        .success-wrapper {
+            margin: 25px auto;
+            padding: 0 12px;
+        }
+
+        .success-card {
+            padding: 25px 18px;
+        }
+
+        .protocol {
+            font-size: 21px;
+        }
+
+        .detail {
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail strong {
+            text-align: left;
+        }
+
+        .success-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+    }
+
+</style>
+```
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+```
+<div class="container topbar-content">
+
+    <div class="brand">
+
+        <span class="brand-title">
+            SEDES
+        </span>
+
+        <span class="brand-subtitle">
+            Secretaria de Desenvolvimento Social e Combate à Pobreza
+        </span>
+
+    </div>
+
+</div>
+```
+
+</header>
+
+<main>
+
+<section class="services">
+
+```
+<div class="container">
+
+    <div class="success-wrapper">
+
+        <div class="success-card">
+
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+
+            <h1>
+                Agendamento confirmado!
+            </h1>
+
+
+            <p>
+                Seu atendimento foi registrado com sucesso.
+            </p>
+
+
+            <div class="protocol-box">
+
+                <span class="protocol-label">
+                    Seu protocolo
+                </span>
+
+                <span class="protocol"
+                      id="protocolo">
+
+                    {{ agendamento.protocolo }}
+
+                </span>
+
+                <button type="button"
+                        class="protocol-copy"
+                        onclick="copiarProtocolo()">
+
+                    Copiar protocolo
+
+                </button>
+
+            </div>
+
+
+            <div class="details">
+
+
+                <div class="detail">
+
+                    <span>
+                        Nome
+                    </span>
+
+                    <strong>
+                        {{ agendamento.nome }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail">
+
+                    <span>
+                        Serviço
+                    </span>
+
+                    <strong>
+                        {{ agendamento.servico.nome }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail">
+
+                    <span>
+                        Data
+                    </span>
+
+                    <strong>
+                        {{ agendamento.data.strftime('%d/%m/%Y') }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail">
+
+                    <span>
+                        Horário
+                    </span>
+
+                    <strong>
+                        {{ agendamento.horario.strftime('%H:%M') }}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="important">
+
+                <strong>
+                    Importante:
+                </strong>
+
+                Guarde seu protocolo. Ele será utilizado
+                juntamente com seu CPF para consultar
+                posteriormente o seu agendamento.
+
+            </div>
+
+
+            <div class="success-actions">
+
+                <a href="{{ url_for('public.consultar_agendamento') }}"
+                   class="btn btn-primary">
+
+                    Consultar agendamento
+
+                </a>
+
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="window.print()">
+
+                    Imprimir comprovante
+
+                </button>
+
+
+                <a href="{{ url_for('public.index') }}"
+                   class="btn btn-secondary">
+
+                    Voltar para página inicial
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</section>
+
+</main>
+
+<footer class="footer">
+
+```
+<div class="container">
+
+    <strong>
+        Prefeitura Municipal de Uauá
+    </strong>
+
+    <span>
+        Secretaria de Desenvolvimento Social e Combate à Pobreza — SEDES
+    </span>
+
+</div>
+```
+
+</footer>
+
+<script>
+
+function copiarProtocolo() {
+
+    const protocolo =
+        document.getElementById("protocolo").innerText.trim();
+
+    navigator.clipboard.writeText(protocolo)
+        .then(function () {
+
+            alert(
+                "Protocolo copiado: " + protocolo
+            );
+
+        })
+        .catch(function () {
+
+            alert(
+                "Não foi possível copiar automaticamente. " +
+                "Protocolo: " + protocolo
+            );
+
+        });
+
+}
+
+</script>
+
+</body>
+
+</html>

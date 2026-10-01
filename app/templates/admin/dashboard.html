@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+```
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Painel Administrativo - Agendamento RG</title>
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}"
+>
+
+<style>
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: #f5f7fa;
+        color: #1f2937;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+
+    /* =========================
+       CABEÇALHO
+    ========================= */
+
+    .admin-header {
+        background: #ffffff;
+
+        border-bottom: 1px solid #e5e7eb;
+
+        padding: 18px 30px;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 20px;
+    }
+
+    .admin-title h1 {
+        margin: 0;
+
+        font-size: 23px;
+
+        color: #111827;
+    }
+
+    .admin-title p {
+        margin: 5px 0 0;
+
+        color: #6b7280;
+
+        font-size: 13px;
+    }
+
+    .admin-actions {
+        display: flex;
+    
+        align-items: center;
+    
+        justify-content: flex-end;
+    
+        gap: 8px;
+    
+        flex-wrap: wrap;
+    }
+
+    .admin-user {
+        color: #374151;
+
+        font-size: 14px;
+
+        font-weight: 600;
+    }
+
+    .header-button,
+    .logout-button {
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        min-height: 38px;
+
+        padding: 0 12px;
+
+        border-radius: 8px;
+
+        border: 1px solid #d1d5db;
+
+        color: #374151;
+
+        background: #ffffff;
+
+        text-decoration: none;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        white-space: nowrap;
+
+        transition: 0.2s;
+    }
+
+    .header-button:hover,
+    .logout-button:hover {
+        background: #f3f4f6;
+    }
+
+
+    /* =========================
+       CONTAINER
+    ========================= */
+
+    .admin-container {
+        max-width: 1400px;
+
+        margin: 0 auto;
+
+        padding: 28px;
+    }
+
+
+    /* =========================
+       CARDS
+    ========================= */
+
+    .stats-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        gap: 18px;
+
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background: #ffffff;
+
+        border: 1px solid #e5e7eb;
+
+        border-radius: 14px;
+
+        padding: 20px;
+
+        box-shadow:
+            0 4px 15px rgba(0, 0, 0, 0.04);
+    }
+
+    .stat-label {
+        color: #6b7280;
+
+        font-size: 13px;
+
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+
+        font-weight: 700;
+
+        color: #111827;
+    }
+
+
+    /* =========================
+       HOJE
+    ========================= */
+
+    .today-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 18px;
+
+        margin-bottom: 24px;
+    }
+
+    .today-card {
+        background: #ffffff;
+
+        border: 1px solid #e5e7eb;
+
+        border-radius: 14px;
+
+        padding: 20px;
+    }
+
+    .today-card h3 {
+        margin: 0 0 8px;
+
+        font-size: 15px;
+    }
+
+    .today-card strong {
+        font-size: 25px;
+    }
+
+
+    /* =========================
+       PAINEL
+    ========================= */
+
+    .panel {
+        background: #ffffff;
+
+        border: 1px solid #e5e7eb;
+
+        border-radius: 14px;
+
+        padding: 22px;
+
+        margin-bottom: 24px;
+
+        box-shadow:
+            0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+
+    .panel-title {
+        margin: 0 0 18px;
+
+        font-size: 18px;
+
+        color: #111827;
+    }
+
+
+    /* =========================
+       FILTROS
+    ========================= */
+
+    .filters {
+        display: grid;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        gap: 15px;
+    }
+
+    .field {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 6px;
+    }
+
+    .field label {
+        font-size: 12px;
+
+        font-weight: 600;
+
+        color: #4b5563;
+    }
+
+    .field input,
+    .field select {
+        width: 100%;
+
+        height: 42px;
+
+        border: 1px solid #d1d5db;
+
+        border-radius: 8px;
+
+        padding: 0 12px;
+
+        background: #ffffff;
+
+        color: #1f2937;
+
+        outline: none;
+    }
+
+    .field input:focus,
+    .field select:focus {
+        border-color: #374151;
+
+        box-shadow:
+            0 0 0 3px
+            rgba(55, 65, 81, 0.08);
+    }
+
+    .filter-actions {
+        display: flex;
+
+        align-items: end;
+
+        gap: 10px;
+
+        grid-column: 1 / -1;
+    }
+
+    .button {
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        min-height: 42px;
+
+        padding: 0 18px;
+
+        border-radius: 8px;
+
+        text-decoration: none;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        cursor: pointer;
+    }
+
+    .button-primary {
+        border: 0;
+
+        background: #1f2937;
+
+        color: #ffffff;
+    }
+
+    .button-primary:hover {
+        background: #111827;
+    }
+
+    .button-secondary {
+        border: 1px solid #d1d5db;
+
+        background: #ffffff;
+
+        color: #374151;
+    }
+
+    .button-secondary:hover {
+        background: #f3f4f6;
+    }
+
+
+    /* =========================
+       HISTÓRICO
+    ========================= */
+
+    .history-header {
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 15px;
+
+        margin-bottom: 18px;
+    }
+
+    .history-count {
+        color: #6b7280;
+
+        font-size: 13px;
+    }
+
+    .table-wrapper {
+        width: 100%;
+
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+
+        border-collapse: collapse;
+
+        min-width: 1100px;
+    }
+
+    th {
+        background: #f9fafb;
+
+        color: #6b7280;
+
+        text-align: left;
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        padding: 13px 12px;
+
+        border-bottom:
+            1px solid #e5e7eb;
+    }
+
+    td {
+        padding: 14px 12px;
+
+        border-bottom:
+            1px solid #f0f1f3;
+
+        font-size: 13px;
+
+        color: #374151;
+
+        vertical-align: top;
+    }
+
+    tbody tr:hover {
+        background: #fafafa;
+    }
+
+    .protocol {
+        font-weight: 700;
+
+        color: #111827;
+    }
+
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .status {
+        display: inline-flex;
+
+        align-items: center;
+
+        padding: 5px 9px;
+
+        border-radius: 999px;
+
+        font-size: 11px;
+
+        font-weight: 700;
+
+        white-space: nowrap;
+    }
+
+    table th:last-child,
+    table td:last-child {
+        width: 1%;
+
+        white-space: nowrap;
+    }
+
+    .status-agendado {
+        background: #dbeafe;
+
+        color: #1e40af;
+    }
+
+    .status-atendido {
+        background: #dcfce7;
+
+        color: #166534;
+    }
+
+    .status-cancelado {
+        background: #fee2e2;
+
+        color: #991b1b;
+    }
+
+    .status-nao-compareceu {
+        background: #fef3c7;
+
+        color: #92400e;
+    }
+
+
+    /* =========================
+       AÇÕES
+    ========================= */
+
+    .status-actions {
+        display: flex;
+
+        flex-wrap: nowrap;
+
+        gap: 4px;
+
+        margin-top: 6px;
+    }
+
+    .status-actions form {
+        margin: 0;
+
+        padding: 0;
+    }
+
+    .action-button {
+        border: 0;
+
+        border-radius: 5px;
+
+        padding: 4px 6px;
+
+        font-size: 9px;
+
+        font-weight: 600;
+
+        cursor: pointer;
+
+        white-space: nowrap;
+
+        line-height: 1.2;
+    }
+
+    .action-atendido {
+        background: #dcfce7;
+
+        color: #166534;
+    }
+
+    .action-atendido:hover {
+        background: #bbf7d0;
+    }
+
+    .action-cancelado {
+        background: #fee2e2;
+
+        color: #991b1b;
+    }
+
+    .action-cancelado:hover {
+        background: #fecaca;
+    }
+
+    .action-nao-compareceu {
+        background: #fef3c7;
+
+        color: #92400e;
+    }
+
+    .action-nao-compareceu:hover {
+        background: #fde68a;
+    }
+
+
+    /* =========================
+       VAZIO
+    ========================= */
+
+    .empty {
+        text-align: center;
+
+        padding: 45px 20px;
+
+        color: #6b7280;
+
+        font-size: 14px;
+    }
+
+
+    /* =========================
+       RODAPÉ
+    ========================= */
+
+    .admin-footer {
+        text-align: center;
+
+        padding: 25px 20px;
+
+        color: #6b7280;
+
+        font-size: 12px;
+    }
+
+
+    /* =========================
+       RESPONSIVO
+    ========================= */
+
+    @media (max-width: 1000px) {
+
+        .stats-grid {
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+        }
+
+        .filters {
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+        }
+
+    }
+
+
+    @media (max-width: 700px) {
+
+        .admin-header {
+            padding: 16px 18px;
+
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+        .admin-actions {
+            width: 100%;
+
+            justify-content:
+                space-between;
+
+            flex-wrap: wrap;
+        }
+
+        .admin-container {
+            padding: 18px;
+        }
+
+        .stats-grid,
+        .today-grid,
+        .filters {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+        }
+
+        .button {
+            width: 100%;
+        }
+
+    }
+
+</style>
+```
+
+</head>
+
+<body>
+
+```
+<!-- =========================
+     CABEÇALHO
+========================== -->
+
+<header class="admin-header">
+
+    <div class="admin-title">
+
+        <h1>
+            Painel Administrativo
+        </h1>
+
+        <p>
+            Gerenciamento de agendamentos de RG
+        </p>
+
+    </div>
+
+
+    <div class="admin-actions">
+
+        <a
+            href="{{ url_for('admin.dashboard') }}"
+            class="header-button"
+        >
+            Dashboard
+        </a>
+    
+        <a
+            href="{{ url_for('admin.servicos') }}"
+            class="header-button"
+        >
+            Serviços
+        </a>
+    
+        <a
+            href="{{ url_for('admin.horarios') }}"
+            class="header-button"
+        >
+            Horários
+        </a>
+    
+        <a
+            href="{{ url_for('admin.administradores') }}"
+            class="header-button"
+        >
+            Administradores
+        </a>
+    
+        <a
+            class="logout-button"
+            href="{{ url_for('auth.logout') }}"
+        >
+            Sair
+        </a>
+    
+    </div>
+
+</header>
+
+
+<!-- =========================
+     CONTEÚDO
+========================== -->
+
+<main class="admin-container">
+
+
+    <!-- INDICADORES -->
+
+    <section class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Total de agendamentos
+            </div>
+
+            <div class="stat-value">
+                {{ total }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Agendados
+            </div>
+
+            <div class="stat-value">
+                {{ agendados }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Atendidos
+            </div>
+
+            <div class="stat-value">
+                {{ atendidos }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Cancelados
+            </div>
+
+            <div class="stat-value">
+                {{ cancelados }}
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- HOJE -->
+
+    <section class="today-grid">
+
+        <div class="today-card">
+
+            <h3>
+                Agendamentos de hoje
+            </h3>
+
+            <strong>
+                {{ hoje_total }}
+            </strong>
+
+        </div>
+
+
+        <div class="today-card">
+
+            <h3>
+                Atendidos hoje
+            </h3>
+
+            <strong>
+                {{ hoje_atendidos }}
+            </strong>
+
+        </div>
+
+    </section>
+
+
+    <!-- FILTROS -->
+
+    <section class="panel">
+
+        <h2 class="panel-title">
+            Histórico de Protocolos
+        </h2>
+
+
+        <form method="get">
+
+            <div class="filters">
+
+
+                <div class="field">
+
+                    <label for="protocolo">
+                        Protocolo
+                    </label>
+
+                    <input
+                        id="protocolo"
+                        name="protocolo"
+                        type="text"
+                        value="{{ protocolo }}"
+                        placeholder="Ex.: UAUA-20260928"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="cpf">
+                        CPF
+                    </label>
+
+                    <input
+                        id="cpf"
+                        name="cpf"
+                        type="text"
+                        value="{{ cpf }}"
+                        placeholder="Digite o CPF"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="servico_id">
+                        Serviço
+                    </label>
+
+                    <select
+                        id="servico_id"
+                        name="servico_id"
+                    >
+
+                        <option value="">
+                            Todos os serviços
+                        </option>
+
+                        {% for servico in servicos %}
+
+                            <option
+                                value="{{ servico.id }}"
+                                {% if servico_id|int == servico.id %}
+                                selected
+                                {% endif %}
+                            >
+                                {{ servico.nome }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="status">
+                        Status
+                    </label>
+
+                    <select
+                        id="status"
+                        name="status"
+                    >
+
+                        <option value="">
+                            Todos os status
+                        </option>
+
+                        <option
+                            value="agendado"
+                            {% if status == "agendado" %}
+                            selected
+                            {% endif %}
+                        >
+                            Agendado
+                        </option>
+
+                        <option
+                            value="atendido"
+                            {% if status == "atendido" %}
+                            selected
+                            {% endif %}
+                        >
+                            Atendido
+                        </option>
+
+                        <option
+                            value="cancelado"
+                            {% if status == "cancelado" %}
+                            selected
+                            {% endif %}
+                        >
+                            Cancelado
+                        </option>
+
+                        <option
+                            value="nao_compareceu"
+                            {% if status == "nao_compareceu" %}
+                            selected
+                            {% endif %}
+                        >
+                            Não compareceu
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="data_inicio">
+                        Data inicial
+                    </label>
+
+                    <input
+                        id="data_inicio"
+                        name="data_inicio"
+                        type="date"
+                        value="{{ data_inicio }}"
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="data_fim">
+                        Data final
+                    </label>
+
+                    <input
+                        id="data_fim"
+                        name="data_fim"
+                        type="date"
+                        value="{{ data_fim }}"
+                    >
+
+                </div>
+
+
+                <div class="filter-actions">
+
+                    <button
+                        type="submit"
+                        class="button button-primary"
+                    >
+                        Pesquisar
+                    </button>
+
+                    <a
+                        href="{{ url_for('admin.dashboard') }}"
+                        class="button button-secondary"
+                    >
+                        Limpar filtros
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- TABELA -->
+
+    <section class="panel">
+
+        <div class="history-header">
+
+            <h2 class="panel-title">
+                Protocolos
+            </h2>
+
+            <span class="history-count">
+
+                {{ total_filtrado }}
+
+                registro(s) encontrado(s)
+
+            </span>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            {% if agendamentos %}
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Protocolo
+                            </th>
+
+                            <th>
+                                Data
+                            </th>
+
+                            <th>
+                                Horário
+                            </th>
+
+                            <th>
+                                Nome
+                            </th>
+
+                            <th>
+                                CPF
+                            </th>
+
+                            <th>
+                                Serviço
+                            </th>
+
+                            <th>
+                                Status / Ações
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for agendamento in agendamentos %}
+
+                            <tr>
+
+                                <td class="protocol">
+                                    {{ agendamento.protocolo }}
+                                </td>
+
+                                <td>
+                                    {{ agendamento.data.strftime('%d/%m/%Y') }}
+                                </td>
+
+                                <td>
+                                    {{ agendamento.horario.strftime('%H:%M') }}
+                                </td>
+
+                                <td>
+                                    {{ agendamento.nome }}
+                                </td>
+
+                                <td>
+                                    {{ agendamento.cpf }}
+                                </td>
+
+                                <td>
+                                    {{ agendamento.servico.nome }}
+                                </td>
+
+                                <td>
+
+
+                                    {% if agendamento.status == "agendado" %}
+
+                                        <span class="status status-agendado">
+                                            Agendado
+                                        </span>
+
+
+                                        <div class="status-actions">
+
+
+                                            <form
+                                                method="post"
+                                                action="{{ url_for(
+                                                    'admin.alterar_status',
+                                                    agendamento_id=agendamento.id
+                                                ) }}"
+                                            >
+                                               
+                                                <input
+                                                    type="hidden"
+                                                    name="status"
+                                                    value="atendido"
+                                                >
+                                                <input
+                                                    type="hidden"
+                                                    name="csrf_token"
+                                                    value="{{ csrf_token() }}"
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="action-button action-atendido"
+                                                >
+                                                    Atendido
+                                                </button>
+
+                                            </form>
+
+
+                                            <form
+                                                method="post"
+                                                action="{{ url_for(
+                                                    'admin.alterar_status',
+                                                    agendamento_id=agendamento.id
+                                                ) }}"
+                                            >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="csrf_token"
+                                                    value="{{ csrf_token() }}"
+                                                >
+                                                
+                                                <input
+                                                    type="hidden"
+                                                    name="status"
+                                                    value="cancelado"
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="action-button action-cancelado"
+                                                >
+                                                    Cancelar
+                                                </button>
+
+                                            </form>
+
+
+                                            <form
+                                                method="post"
+                                                action="{{ url_for(
+                                                    'admin.alterar_status',
+                                                    agendamento_id=agendamento.id
+                                                ) }}"
+                                            >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="status"
+                                                    value="nao_compareceu"
+                                                >
+                                                <input
+                                                    type="hidden"
+                                                    name="csrf_token"
+                                                    value="{{ csrf_token() }}"
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="action-button action-nao-compareceu"
+                                                >
+                                                    Não compareceu
+                                                </button>
+
+                                            </form>
+
+
+                                        </div>
+
+
+                                    {% elif agendamento.status == "atendido" %}
+
+                                        <span class="status status-atendido">
+                                            Atendido
+                                        </span>
+
+
+                                    {% elif agendamento.status == "cancelado" %}
+
+                                        <span class="status status-cancelado">
+                                            Cancelado
+                                        </span>
+
+
+                                    {% elif agendamento.status == "nao_compareceu" %}
+
+                                        <span class="status status-nao-compareceu">
+                                            Não compareceu
+                                        </span>
+
+
+                                    {% else %}
+
+                                        <span class="status">
+                                            {{ agendamento.status }}
+                                        </span>
+
+                                    {% endif %}
+
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+
+            {% else %}
+
+                <div class="empty">
+
+                    Nenhum agendamento encontrado
+                    com os filtros informados.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer class="admin-footer">
+
+    Secretaria de Desenvolvimento Social e Combate à Pobreza
+    · Prefeitura Municipal de Uauá
+
+</footer>
+```
+
+</body>
+
+</html>

@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+
+{% block title %}Novo horário - Agendamento RG{% endblock %}
+
+{% block content %}
+
+<section class="novo-horario-page">
+
+    <div class="page-header">
+
+        <div>
+            <h1>Novo horário</h1>
+
+            <p>
+                Cadastre uma data e um horário disponível para agendamento.
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('admin.horarios') }}"
+            class="back-button"
+        >
+            Voltar
+        </a>
+
+    </div>
+
+
+    <div class="form-card">
+
+        <form method="post">
+
+            <div class="form-grid">
+
+                <div class="form-group full">
+
+                    <label for="servico_id">
+                        Serviço
+                    </label>
+
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="{{ csrf_token() }}"
+                    >
+
+                    <select
+                        id="servico_id"
+                        name="servico_id"
+                        required
+                    >
+
+                        <option value="">
+                            Selecione um serviço
+                        </option>
+
+                        {% for servico in servicos %}
+
+                        <option
+                            value="{{ servico.id }}"
+                            {% if request.form.get('servico_id')|int == servico.id %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ servico.nome }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <span class="field-help">
+                        Selecione o serviço ao qual este horário estará vinculado.
+                    </span>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="data">
+                        Data
+                    </label>
+
+                    <input
+                        type="date"
+                        id="data"
+                        name="data"
+                        value="{{ request.form.get('data', '') }}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="hora">
+                        Horário
+                    </label>
+
+                    <input
+                        type="time"
+                        id="hora"
+                        name="hora"
+                        value="{{ request.form.get('hora', '') }}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="capacidade">
+                        Capacidade
+                    </label>
+
+                    <input
+                        type="number"
+                        id="capacidade"
+                        name="capacidade"
+                        min="1"
+                        value="{{ request.form.get('capacidade', '1') }}"
+                        required
+                    >
+
+                    <span class="field-help">
+                        Quantidade de pessoas que poderão utilizar este horário.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="info-icon">
+                    i
+                </div>
+
+                <div>
+
+                    <strong>
+                        Sobre a disponibilidade
+                    </strong>
+
+                    <p>
+                        O horário será criado como <strong>ativo</strong>.
+                        Enquanto estiver ativo e houver vagas disponíveis,
+                        ele poderá ser utilizado no agendamento público.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <a
+                    href="{{ url_for('admin.horarios') }}"
+                    class="cancel-button"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    class="submit-button"
+                >
+                    Cadastrar horário
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+
+<style>
+
+.novo-horario-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.page-header h1 {
+    margin: 0 0 6px;
+    color: #1f2937;
+    font-size: 28px;
+}
+
+.page-header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.back-button:hover {
+    background: #f3f4f6;
+}
+
+.form-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1f2937;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+.form-group select {
+    cursor: pointer;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.12);
+}
+
+.field-help {
+    margin-top: 7px;
+    color: #6b7280;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 28px;
+    padding: 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.info-box strong {
+    color: #374151;
+    font-size: 13px;
+}
+
+.info-box p {
+    margin: 5px 0 0;
+    color: #6b7280;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid #eef0f3;
+}
+
+.cancel-button,
+.submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 17px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.cancel-button {
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+}
+
+.cancel-button:hover {
+    background: #f3f4f6;
+}
+
+.submit-button {
+    border: 1px solid #1f2937;
+    background: #1f2937;
+    color: #ffffff;
+}
+
+.submit-button:hover {
+    background: #111827;
+}
+
+@media (max-width: 700px) {
+
+    .novo-horario-page {
+        padding: 25px 15px;
+    }
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .back-button {
+        width: 100%;
+    }
+
+    .form-card {
+        padding: 20px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .cancel-button,
+    .submit-button {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+{% endblock %}

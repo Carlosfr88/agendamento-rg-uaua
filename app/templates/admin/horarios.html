@@ -1,0 +1,775 @@
+{% extends "base.html" %}
+
+{% block title %}Horários - Agendamento RG{% endblock %}
+
+{% block content %}
+
+<section class="horarios-page">
+
+    <div class="horarios-header">
+
+        <div>
+
+            <h1>
+                Datas e horários
+            </h1>
+
+            <p>
+                Gerencie as datas, horários e vagas disponíveis.
+            </p>
+
+        </div>
+
+        <div class="header-actions">
+
+            <a
+                href="{{ url_for('admin.novo_horario') }}"
+                class="primary-button"
+            >
+                + Novo horário
+            </a>
+
+            <a
+                href="{{ url_for('admin.dashboard') }}"
+                class="secondary-button"
+            >
+                Voltar
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="horarios-card">
+
+        <div class="filters-card">
+
+            <form method="get" class="filters-form">
+        
+                <div class="filter-group">
+                    <label for="servico_id">
+                        Serviço
+                    </label>
+        
+                    <select
+                        id="servico_id"
+                        name="servico_id"
+                    >
+                        <option value="">
+                            Todos os serviços
+                        </option>
+        
+                        {% for servico in servicos %}
+                            <option
+                                value="{{ servico.id }}"
+                                {% if filtro_servico_id == servico.id %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ servico.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+        
+        
+                <div class="filter-group">
+                    <label for="data_inicial">
+                        Data inicial
+                    </label>
+        
+                    <input
+                        type="date"
+                        id="data_inicial"
+                        name="data_inicial"
+                        value="{{ filtro_data_inicial }}"
+                    >
+                </div>
+        
+        
+                <div class="filter-group">
+                    <label for="data_final">
+                        Data final
+                    </label>
+        
+                    <input
+                        type="date"
+                        id="data_final"
+                        name="data_final"
+                        value="{{ filtro_data_final }}"
+                    >
+                </div>
+        
+        
+                <div class="filter-group">
+                    <label for="status">
+                        Status
+                    </label>
+        
+                    <select
+                        id="status"
+                        name="status"
+                    >
+                        <option
+                            value=""
+                            {% if filtro_status == "" %}
+                                selected
+                            {% endif %}
+                        >
+                            Todos
+                        </option>
+        
+                        <option
+                            value="ativo"
+                            {% if filtro_status == "ativo" %}
+                                selected
+                            {% endif %}
+                        >
+                            Ativos
+                        </option>
+        
+                        <option
+                            value="inativo"
+                            {% if filtro_status == "inativo" %}
+                                selected
+                            {% endif %}
+                        >
+                            Inativos
+                        </option>
+                    </select>
+                </div>
+        
+        
+                <div class="filter-actions">
+        
+                    <button
+                        type="submit"
+                        class="filter-button"
+                    >
+                        Filtrar
+                    </button>
+        
+                    <a
+                        href="{{ url_for('admin.horarios') }}"
+                        class="clear-filter-button"
+                    >
+                        Limpar
+                    </a>
+        
+                </div>
+        
+            </form>
+        
+        </div>
+
+        {% if horarios %}
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Serviço
+                        </th>
+
+                        <th>
+                            Data
+                        </th>
+
+                        <th>
+                            Horário
+                        </th>
+
+                        <th>Capacidade
+
+                        </th>
+
+                        <th>Ocupadas
+
+                        </th>
+
+                        <th>Disponíveis
+
+                        </th>
+
+                        <th>Status
+
+                        </th>
+
+                        <th>
+                            Ações
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for horario in horarios %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                {{ horario.servico.nome }}
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+                            {{ horario.data.strftime('%d/%m/%Y') }}
+                        </td>
+
+
+                        <td>
+                            {{ horario.hora.strftime('%H:%M') }}
+                        </td>
+
+
+                        <td>
+                            <strong>
+                                {{ horario.capacidade }}
+                            </strong>
+                        </td>
+                        
+                        <td>
+                            <span class="occupancy-count">
+                                {{ horario.ocupadas }}
+                            </span>
+                        </td>
+                        
+                        <td>
+                            {% if horario.disponiveis > 0 %}
+                        
+                                <span class="availability-count available">
+                                    {{ horario.disponiveis }}
+                                </span>
+                        
+                            {% else %}
+                        
+                                <span class="availability-count full">
+                                    0
+                                </span>
+                        
+                            {% endif %}
+                        </td>
+                        
+                        <td>
+                            {% if horario.ativo %}
+                                <span class="status active">
+                                    Ativo
+                                </span>
+                            {% else %}
+                                <span class="status inactive">
+                                    Inativo
+                                </span>
+                            {% endif %}
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <a
+                                    href="{{ url_for(
+                                        'admin.editar_horario',
+                                        horario_id=horario.id
+                                    ) }}"
+                                    class="edit-button"
+                                >
+                                    Editar
+                                </a>
+
+
+                                <form
+                                    method="post"
+                                    action="{{ url_for(
+                                        'admin.alterar_status_horario',
+                                        horario_id=horario.id
+                                    ) }}"
+                                >
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token() }}"
+                                >
+
+                                    {% if horario.ativo %}
+
+                                        <button
+                                            type="submit"
+                                            class="disable-button"
+                                        >
+                                            Desativar
+                                        </button>
+
+                                    {% else %}
+
+                                        <button
+                                            type="submit"
+                                            class="enable-button"
+                                        >
+                                            Ativar
+                                        </button>
+
+                                    {% endif %}
+
+                                </form>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                +
+            </div>
+
+            <h2>
+                Nenhum horário cadastrado
+            </h2>
+
+            <p>
+                Cadastre o primeiro horário disponível.
+            </p>
+
+            <a
+                href="{{ url_for('admin.novo_horario') }}"
+                class="primary-button"
+            >
+                Criar horário
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<style>
+
+        .occupancy-count,
+    .availability-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 28px;
+        padding: 0 8px;
+        border-radius: 7px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .occupancy-count {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .availability-count.available {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .availability-count.full {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .filters-card {
+        margin-bottom: 24px;
+        padding: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+    
+    .filters-form {
+        display: grid;
+        grid-template-columns:
+            minmax(180px, 1.4fr)
+            minmax(150px, 1fr)
+            minmax(150px, 1fr)
+            minmax(150px, 1fr)
+            auto;
+        gap: 16px;
+        align-items: end;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+    
+    .filter-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+        width: 100%;
+        min-height: 42px;
+        padding: 0 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #111827;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+    
+    .filter-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .filter-button,
+    .clear-filter-button {
+        min-height: 42px;
+        padding: 0 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+    
+    .filter-button {
+        border: 1px solid #2563eb;
+        background: #2563eb;
+        color: #ffffff;
+    }
+    
+    .filter-button:hover {
+        background: #1d4ed8;
+    }
+    
+    .clear-filter-button {
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+        color: #374151;
+    }
+    
+    .clear-filter-button:hover {
+        background: #f3f4f6;
+    }
+    
+    @media (max-width: 1000px) {
+    
+        .filters-form {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    
+        .filter-actions {
+            grid-column: span 2;
+        }
+    }
+    
+    @media (max-width: 600px) {
+    
+        .filters-form {
+            grid-template-columns: 1fr;
+        }
+    
+        .filter-actions {
+            grid-column: auto;
+            width: 100%;
+        }
+    
+        .filter-button,
+        .clear-filter-button {
+            flex: 1;
+        }
+    }    
+
+.horarios-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.horarios-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.horarios-header h1 {
+    margin: 0 0 6px;
+    color: #1f2937;
+    font-size: 28px;
+}
+
+.horarios-header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.primary-button,
+.secondary-button,
+.edit-button,
+.disable-button,
+.enable-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.primary-button {
+    border: 1px solid #1f2937;
+    background: #1f2937;
+    color: #ffffff;
+}
+
+.primary-button:hover {
+    background: #111827;
+}
+
+.secondary-button {
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+}
+
+.secondary-button:hover {
+    background: #f3f4f6;
+}
+
+.horarios-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f8fafc;
+}
+
+th {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+td {
+    padding: 15px 16px;
+    border-bottom: 1px solid #eef0f3;
+    color: #4b5563;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background: #fafafa;
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 65px;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status.inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.actions form {
+    margin: 0;
+}
+
+.edit-button {
+    min-height: 32px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+}
+
+.edit-button:hover {
+    background: #f3f4f6;
+}
+
+.disable-button {
+    min-height: 32px;
+    border: 1px solid #fecaca;
+    background: #fff1f2;
+    color: #b91c1c;
+}
+
+.disable-button:hover {
+    background: #fee2e2;
+}
+
+.enable-button {
+    min-height: 32px;
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.enable-button:hover {
+    background: #dcfce7;
+}
+
+.empty-state {
+    padding: 70px 25px;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 55px;
+    height: 55px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #f3f4f6;
+    color: #374151;
+    font-size: 28px;
+}
+
+.empty-state h2 {
+    margin: 0 0 8px;
+    color: #1f2937;
+    font-size: 20px;
+}
+
+.empty-state p {
+    margin: 0 0 22px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+@media (max-width: 700px) {
+
+    .horarios-page {
+        padding: 25px 15px;
+    }
+
+    .horarios-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .header-actions a {
+        flex: 1;
+    }
+
+    th,
+    td {
+        padding: 12px 10px;
+    }
+
+    .actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .actions .edit-button,
+    .actions button {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+{% endblock %}

@@ -1,0 +1,538 @@
+{% extends "base.html" %}
+
+{% block title %}Administradores - Painel Administrativo{% endblock %}
+
+{% block content %}
+
+<div class="admin-page">
+
+    <header class="admin-header">
+
+        <div>
+            <h1>Administradores</h1>
+
+            <p>
+                Gerenciamento dos usuários administrativos do sistema.
+            </p>
+        </div>
+
+        <div class="header-actions">
+
+            <a
+                href="{{ url_for('admin.novo_administrador') }}"
+                class="button-primary"
+            >
+                + Novo administrador
+            </a>
+
+            <a
+                href="{{ url_for('admin.dashboard') }}"
+                class="button-secondary"
+            >
+                Voltar
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <section class="content-card">
+
+        <div class="card-header">
+
+            <div>
+                <h2>Administradores cadastrados</h2>
+
+                <p>
+                    Usuários com acesso ao painel administrativo.
+                </p>
+            </div>
+
+            <div class="total-badge">
+                {{ administradores|length }} administrador(es)
+            </div>
+
+        </div>
+
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Nome</th>
+                        <th>Usuário</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for usuario in administradores %}
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ usuario.nome }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ usuario.username }}
+                        </td>
+
+                        <td>
+
+                            {% if usuario.ativo %}
+
+                                <span class="status status-ativo">
+                                    Ativo
+                                </span>
+
+                            {% else %}
+
+                                <span class="status status-inativo">
+                                    Inativo
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <div class="action-buttons">
+                        
+                                <a
+                                    href="{{
+                                        url_for(
+                                            'admin.editar_administrador',
+                                            usuario_id=usuario.id
+                                        )
+                                    }}"
+                                    class="button-edit"
+                                >
+                                    Editar
+                                </a>
+                        
+                        
+                                {% if usuario.id == current_user.id %}
+                        
+                                    <span class="current-user">
+                                        Usuário atual
+                                    </span>
+                        
+                                {% else %}
+                        
+                                    <form
+                                        method="POST"
+                                        action="{{
+                                            url_for(
+                                                'admin.alterar_status_administrador',
+                                                usuario_id=usuario.id
+                                            )
+                                        }}"
+                                        class="status-form"
+                                    >
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="{{ csrf_token() }}"
+                                    >
+                        
+                                        {% if usuario.ativo %}
+                        
+                                            <button
+                                                type="submit"
+                                                class="button-danger"
+                                                onclick="return confirm(
+                                                    'Deseja realmente desativar este administrador?'
+                                                );"
+                                            >
+                                                Desativar
+                                            </button>
+                        
+                                        {% else %}
+                        
+                                            <button
+                                                type="submit"
+                                                class="button-success"
+                                            >
+                                                Ativar
+                                            </button>
+                        
+                                        {% endif %}
+                        
+                                    </form>
+                        
+                                {% endif %}
+                        
+                            </div>
+                        
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="4"
+                            class="empty"
+                        >
+                            Nenhum administrador cadastrado.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<style>
+
+.admin-page {
+    min-height: calc(100vh - 60px);
+    padding: 35px;
+    background: #f5f7fa;
+}
+
+.admin-header {
+    max-width: 1200px;
+    margin: 0 auto 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.admin-header h1 {
+    margin: 0 0 6px;
+
+    font-size: 28px;
+    color: #1f2937;
+}
+
+.admin-header p {
+    margin: 0;
+
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.button-primary,
+.button-secondary,
+.button-danger,
+.button-success {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 40px;
+    padding: 0 16px;
+
+    border-radius: 9px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    transition: 0.2s;
+
+    cursor: pointer;
+}
+
+.button-primary {
+    background: #1f2937;
+    color: #ffffff;
+}
+
+.button-primary:hover {
+    background: #111827;
+}
+
+.button-secondary {
+    background: #ffffff;
+    color: #374151;
+
+    border: 1px solid #d8dee6;
+}
+
+.button-secondary:hover {
+    background: #f9fafb;
+}
+
+.button-danger {
+    border: 1px solid #fecaca;
+
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.button-danger:hover {
+    background: #fecaca;
+}
+
+.button-success {
+    border: 1px solid #bbf7d0;
+
+    background: #dcfce7;
+    color: #166534;
+}
+
+.button-success:hover {
+    background: #bbf7d0;
+}
+
+.content-card {
+    max-width: 1200px;
+    margin: 0 auto;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+    padding: 22px 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h2 {
+    margin: 0 0 5px;
+
+    font-size: 18px;
+    color: #1f2937;
+}
+
+.card-header p {
+    margin: 0;
+
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.total-badge {
+    padding: 7px 11px;
+
+    border-radius: 8px;
+
+    background: #f3f4f6;
+    color: #374151;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 13px 20px;
+
+    background: #f9fafb;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    text-align: left;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    color: #6b7280;
+
+    text-transform: uppercase;
+}
+
+td {
+    padding: 15px 20px;
+
+    border-bottom: 1px solid #f0f1f3;
+
+    font-size: 14px;
+    color: #374151;
+}
+
+tbody tr:hover {
+    background: #fafafa;
+}
+
+.status {
+    display: inline-block;
+
+    padding: 5px 9px;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.status-ativo {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-inativo {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.current-user {
+    display: inline-block;
+
+    padding: 6px 10px;
+
+    border-radius: 7px;
+
+    background: #f3f4f6;
+    color: #6b7280;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-form {
+    margin: 0;
+}
+
+.action-buttons {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+}
+
+.button-edit {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 34px;
+
+    padding: 0 12px;
+
+    border-radius: 7px;
+
+    border: 1px solid #d8dee6;
+
+    background: #ffffff;
+
+    color: #374151;
+
+    text-decoration: none;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.button-edit:hover {
+    background: #f3f4f6;
+}
+
+.empty {
+    padding: 35px 20px;
+
+    text-align: center;
+
+    color: #6b7280;
+}
+
+@media (max-width: 700px) {
+
+    .admin-page {
+        padding: 20px 15px;
+    }
+
+    .admin-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .admin-header h1 {
+        font-size: 24px;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .button-primary,
+    .button-secondary {
+        flex: 1;
+    }
+
+    .card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    th,
+    td {
+        padding: 12px 14px;
+    }
+
+}
+
+</style>
+
+{% endblock %}

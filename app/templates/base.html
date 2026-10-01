@@ -1,0 +1,289 @@
+
+<!doctype html>
+
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        {% block title %}
+        Agendamento RG - SEDES Uauá
+        {% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        body {
+            background: #f5f7fa;
+            color: #1f2937;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        /*
+        ========================================
+        CABEÇALHO
+        ========================================
+        */
+
+        .topbar {
+            display: none;
+        }
+
+
+        /*
+        ========================================
+        CONTEÚDO PRINCIPAL
+        ========================================
+        */
+
+        main {
+            min-height: 100vh;
+        }
+
+
+        /*
+        ========================================
+        MENSAGENS
+        ========================================
+        */
+
+        .flash-container {
+
+            width: 100%;
+            max-width: 1400px;
+
+            margin: 0 auto;
+
+            padding: 16px 28px 0;
+        }
+
+
+        .flash-message {
+
+            display: flex;
+
+            align-items: center;
+
+            min-height: 48px;
+
+            margin-bottom: 10px;
+
+            padding: 12px 16px;
+
+            border-radius: 10px;
+
+            border: 1px solid #e5e7eb;
+
+            background: #ffffff;
+
+            color: #374151;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            line-height: 1.4;
+
+            box-shadow:
+                0 4px 14px rgba(0, 0, 0, 0.06);
+        }
+
+
+        /*
+        ========================================
+        SUCESSO
+        ========================================
+        */
+
+        .flash-success {
+
+            background: #f0fdf4;
+
+            color: #166534;
+
+            border-color: #bbf7d0;
+        }
+
+
+        /*
+        ========================================
+        ERRO
+        ========================================
+        */
+
+        .flash-danger {
+
+            background: #fef2f2;
+
+            color: #991b1b;
+
+            border-color: #fecaca;
+        }
+
+
+        /*
+        ========================================
+        AVISO
+        ========================================
+        */
+
+        .flash-warning {
+
+            background: #fffbeb;
+
+            color: #92400e;
+
+            border-color: #fde68a;
+        }
+
+
+        /*
+        ========================================
+        INFORMAÇÃO
+        ========================================
+        */
+
+        .flash-info {
+
+            background: #eff6ff;
+
+            color: #1e40af;
+
+            border-color: #bfdbfe;
+        }
+
+
+        /*
+        ========================================
+        RODAPÉ
+        ========================================
+        */
+
+        footer {
+
+            padding: 22px 20px;
+
+            text-align: center;
+
+            background: #ffffff;
+
+            border-top: 1px solid #e5e7eb;
+
+            color: #6b7280;
+
+            font-size: 13px;
+        }
+
+
+        /*
+        ========================================
+        RESPONSIVO
+        ========================================
+        */
+
+        @media (max-width: 600px) {
+
+            .flash-container {
+
+                padding: 12px 15px 0;
+            }
+
+
+            .flash-message {
+
+                min-height: 46px;
+
+                padding: 11px 14px;
+
+                font-size: 13px;
+
+                border-radius: 9px;
+            }
+
+
+            footer {
+
+                padding: 18px 15px;
+
+                font-size: 12px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <main>
+
+
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+
+            {% if mensagens %}
+
+                <div class="flash-container">
+
+                    {% for categoria, mensagem in mensagens %}
+
+                        <div class="flash-message flash-{{ categoria }}">
+
+                            {{ mensagem }}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        {% block content %}{% endblock %}
+
+
+    </main>
+
+
+    <footer>
+
+        Secretaria de Desenvolvimento Social e Combate à Pobreza
+        · Prefeitura Municipal de Uauá
+
+    </footer>
+
+
+</body>
+
+</html>

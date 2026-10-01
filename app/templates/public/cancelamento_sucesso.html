@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Agendamento Cancelado - SEDES Uauá
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+
+        .success-wrapper {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .success-card {
+            background: #ffffff;
+            border: 1px solid #e1e6eb;
+            border-radius: 12px;
+            padding: 35px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: #fff1f1;
+            color: #b42318;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .success-card h1 {
+            margin: 0 0 10px;
+            color: #123b5d;
+        }
+
+        .success-card p {
+            margin: 0 0 25px;
+            color: #65717d;
+            line-height: 1.6;
+        }
+
+        .protocol-box {
+            margin: 25px 0;
+            padding: 18px;
+            border: 1px solid #e1e6eb;
+            border-radius: 10px;
+            background: #f5f7fa;
+        }
+
+        .protocol-label {
+            display: block;
+            margin-bottom: 6px;
+            color: #65717d;
+            font-size: 12px;
+        }
+
+        .protocol {
+            color: #123b5d;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #fff4e5;
+            border: 1px solid #f2d29b;
+            color: #7a4b00;
+            font-weight: 700;
+        }
+
+        .btn-home {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 13px 22px;
+            border-radius: 8px;
+            background: #123b5d;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .btn-home:hover {
+            background: #0b2941;
+        }
+
+        @media (max-width: 600px) {
+
+            .success-wrapper {
+                margin: 30px auto;
+                padding: 0 12px;
+            }
+
+            .success-card {
+                padding: 25px 20px;
+            }
+
+            .protocol {
+                font-size: 19px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header class="topbar">
+
+    <div class="container topbar-content">
+
+        <div class="brand">
+
+            <span class="brand-title">
+                SEDES
+            </span>
+
+            <span class="brand-subtitle">
+                Secretaria de Desenvolvimento Social e Combate à Pobreza
+            </span>
+
+        </div>
+
+        <a href="{{ url_for('public.index') }}"
+           class="btn-login">
+
+            Início
+
+        </a>
+
+    </div>
+
+</header>
+
+
+<main>
+
+<section class="services">
+
+    <div class="container">
+
+        <div class="success-wrapper">
+
+            <div class="success-card">
+
+
+                <div class="success-icon">
+                    ✓
+                </div>
+
+
+                <h1>
+                    Agendamento cancelado
+                </h1>
+
+
+                <p>
+
+                    Seu agendamento foi cancelado
+                    com sucesso.
+
+                    O registro foi mantido no sistema
+                    para fins de histórico.
+
+                </p>
+
+
+                <div class="protocol-box">
+
+                    <span class="protocol-label">
+                        Protocolo do agendamento
+                    </span>
+
+                    <span class="protocol">
+
+                        {{ agendamento.protocolo }}
+
+                    </span>
+
+                </div>
+
+
+                <div class="status">
+
+                    Status: Cancelado
+
+                </div>
+
+
+                <a
+                    href="{{ url_for(
+                        'public.index'
+                    ) }}"
+                    class="btn-home"
+                >
+
+                    Voltar para página inicial
+
+                </a>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<footer class="footer">
+
+    <div class="container">
+
+        <strong>
+            Prefeitura Municipal de Uauá
+        </strong>
+
+        <span>
+            Secretaria de Desenvolvimento Social
+            e Combate à Pobreza — SEDES
+        </span>
+
+    </div>
+
+</footer>
+
+
+</body>
+
+</html>
