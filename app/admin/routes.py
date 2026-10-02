@@ -1,7 +1,4 @@
 from datetime import datetime, date, time
-import json
-
-from sqlalchemy import text
 
 from flask import (
     Blueprint,
@@ -1462,80 +1459,6 @@ def novo_administrador():
     return render_template(
         "admin/novo_administrador.html"
     )
-# ============================================================
-# IMPORTAÇÃO TEMPORÁRIA DOS DADOS
-# ============================================================
-
-@admin_bp.route(
-    "/importar-dados",
-    methods=["GET", "POST"]
-)
-@login_required
-def importar_dados():
-
-    if request.method == "GET":
-
-        return render_template(
-            "admin/importar_dados.html"
-        )
-
-    arquivo = request.files.get("arquivo")
-
-    if not arquivo:
-
-        flash(
-            "Selecione o arquivo de migração.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("admin.importar_dados")
-        )
-
-    if not arquivo.filename.lower().endswith(".json"):
-
-        flash(
-            "O arquivo deve estar no formato JSON.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("admin.importar_dados")
-        )
-
-    try:
-
-        conteudo = arquivo.read().decode("utf-8")
-        dados = json.loads(conteudo)
-
-    except Exception:
-
-        flash(
-            "Não foi possível ler o arquivo JSON.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("admin.importar_dados")
-        )
-
-    chaves_obrigatorias = {
-        "usuarios",
-        "servicos",
-        "horarios",
-        "agendamentos"
-    }
-
-    if not chaves_obrigatorias.issubset(dados.keys()):
-
-        flash(
-            "O arquivo não possui a estrutura esperada.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("admin.importar_dados")
-        )
 
     try:
 
@@ -1764,13 +1687,3 @@ def importar_dados():
             url_for("admin.importar_dados")
         )
 
-@admin_bp.route("/diagnostico-banco")
-@login_required
-def diagnostico_banco():
-
-    return {
-        "usuarios": User.query.count(),
-        "servicos": Servico.query.count(),
-        "horarios": HorarioDisponivel.query.count(),
-        "agendamentos": Agendamento.query.count()
-    }            
