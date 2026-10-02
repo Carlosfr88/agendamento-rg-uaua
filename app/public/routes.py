@@ -15,7 +15,8 @@ from ..extensions import db
 from ..models import (
     Servico,
     HorarioDisponivel,
-    Agendamento
+    Agendamento,
+    Informacao
 )
 
 
@@ -709,6 +710,24 @@ def agendamento_formulario(
         vagas_restantes=vagas_restantes
     )
 
+@public_bp.route("/informacoes")
+def informacoes():
+
+    informacoes = (
+        Informacao.query
+        .filter_by(ativo=True)
+        .order_by(
+            Informacao.ordem.asc(),
+            Informacao.id.asc()
+        )
+        .all()
+    )
+
+    return render_template(
+        "public/informacoes.html",
+        informacoes=informacoes
+    )
+    
 # ============================================================
 # CONSULTAR AGENDAMENTO
 # ============================================================

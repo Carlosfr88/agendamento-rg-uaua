@@ -192,3 +192,37 @@ class HorarioDisponivel(db.Model):
             lazy=True
         )
     )    
+
+# ==========================================================
+# INFORMAÇÕES PÚBLICAS
+# ==========================================================
+
+class Informacao(db.Model):
+    __tablename__ = "informacoes"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    titulo = db.Column(
+        db.String(150),
+        nullable=False
+    )
+
+    conteudo = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    ordem = db.Column(
+        db.Integer,
+        default=0,
+        nullable=False
+    )
+
+    ativo = db.Column(
+        db.Boolean,
+        default=True,
+        nullable=False
+    )    

@@ -19,7 +19,8 @@ from ..models import (
     User,
     Servico,
     HorarioDisponivel,
-    Agendamento
+    Agendamento,
+    Informacao
 )
 
 
@@ -1203,6 +1204,287 @@ def alterar_status_horario(horario_id):
         )
     )
 
+# ============================================================
+# INFORMAÇÕES PÚBLICAS
+# ============================================================
+
+@admin_bp.route("/informacoes")
+@login_required
+def informacoes():
+
+    informacoes = (
+        Informacao.query
+        .order_by(
+            Informacao.ordem.asc(),
+            Informacao.id.asc()
+        )
+        .all()
+    )
+
+    return render_template(
+        "admin/informacoes.html",
+        informacoes=informacoes
+    )
+
+
+# ============================================================
+# NOVA INFORMAÇÃO
+# ============================================================
+
+@admin_bp.route(
+    "/informacoes/novo",
+    methods=["GET", "POST"]
+)
+@login_required
+def nova_informacao():
+
+    if request.method == "POST":
+
+        titulo = request.form.get(
+            "titulo",
+            ""
+        ).strip()
+
+        conteudo = request.form.get(
+            "conteudo",
+            ""
+        ).strip()
+
+        ordem = request.form.get(
+            "ordem",
+            type=int
+        )
+
+        if not titulo:
+
+            flash(
+                "Informe o título.",
+                "danger"
+            )
+
+            return render_template(
+                "admin/nova_informacao.html"
+            )
+
+        if not conteudo:
+
+            flash(
+                "Informe o conteúdo.",
+                "danger"
+            )
+
+            return render_template(
+                "admin/nova_informacao.html"
+            )
+
+        if ordem is None or ordem < 0:
+
+            flash(
+                "A ordem deve ser um número igual ou maior que zero.",
+                "danger"
+            )
+
+            return render_template(
+                "admin/nova_informacao.html"
+            )
+
+        informacao = Informacao(
+            titulo=titulo,
+            conteudo=conteudo,
+            ordem=ordem,
+            ativo=True
+        )
+
+        db.session.add(
+            informacao
+        )
+
+        db.session.commit()
+
+        flash(
+            "Informação criada com sucesso.",
+            "success"
+        )
+
+        return redirect(
+            url_for(
+                "admin.informacoes"
+            )
+        )
+
+    return render_template(
+        "admin/nova_informacao.html"
+    )
+
+
+# ============================================================
+# EDITAR INFORMAÇÃO
+# ============================================================
+
+@admin_bp.route(
+    "/informacoes/<int:informacao_id>/editar",
+    methods=["GET", "POST"]
+)
+@login_required
+def editar_informacao(informacao_id):
+
+    informacao = (
+        Informacao.query.get_or_404(
+            informacao_id
+        )
+    )
+
+    if request.method == "POST":
+
+        titulo = request.form.get(
+            "titulo",
+            ""
+        ).strip()
+
+        conteudo = request.form.get(
+            "conteudo",
+            ""
+        ).strip()
+
+        ordem = request.form.get(
+            "ordem",
+            type=int
+        )
+
+        if not titulo:
+
+            flash(
+                "Informe o título.",
+                "danger"
+            )
+
+            return render_template(
+                "admin/editar_informacao.html",
+                informacao=informacao
+            )
+
+        if not conteudo:
+
+            flash(
+                "Informe o conteúdo.",
+                "danger"
+            )
+
+            return render_template(
+                "admin/editar_informacao.html",
+                informacao=informacao
+            )
+
+        if ordem is None or ordem < 0:
+
+            flash(
+                "A ordem deve ser um número igual ou maior que zero.",
+                "danger"
+            )
+
+            return render_template(
+                "admin/editar_informacao.html",
+                informacao=informacao
+            )
+
+        informacao.titulo = titulo
+        informacao.conteudo = conteudo
+        informacao.ordem = ordem
+
+        db.session.commit()
+
+        flash(
+            "Informação atualizada com sucesso.",
+            "success"
+        )
+
+        return redirect(
+            url_for(
+                "admin.informacoes"
+            )
+        )
+
+    return render_template(
+        "admin/editar_informacao.html",
+        informacao=informacao
+    )
+
+
+# ============================================================
+# ATIVAR / DESATIVAR INFORMAÇÃO
+# ============================================================
+
+@admin_bp.route(
+    "/informacoes/<int:informacao_id>/status",
+    methods=["POST"]
+)
+@login_required
+def alterar_status_informacao(informacao_id):
+
+    informacao = (
+        Informacao.query.get_or_404(
+            informacao_id
+        )
+    )
+
+    informacao.ativo = not informacao.ativo
+
+    db.session.commit()
+
+    if informacao.ativo:
+
+        flash(
+            "Informação ativada com sucesso.",
+            "success"
+        )
+
+    else:
+
+        flash(
+            "Informação desativada com sucesso.",
+            "success"
+        )
+
+    return redirect(
+        url_for(
+            "admin.informacoes"
+        )
+    )
+
+
+# ============================================================
+# EXCLUIR INFORMAÇÃO
+# ============================================================
+
+@admin_bp.route(
+    "/informacoes/<int:informacao_id>/excluir",
+    methods=["POST"]
+)
+@login_required
+def excluir_informacao(informacao_id):
+
+    informacao = (
+        Informacao.query.get_or_404(
+            informacao_id
+        )
+    )
+
+    db.session.delete(
+        informacao
+    )
+
+    db.session.commit()
+
+    flash(
+        "Informação excluída com sucesso.",
+        "success"
+    )
+
+    return redirect(
+        url_for(
+            "admin.informacoes"
+        )
+    )
 
 # ============================================================
 # ADMINISTRADORES
