@@ -2640,4 +2640,152 @@ def relatorios():
 def backup():
     return render_template(
         "admin/backup.html"
-    )    
+    )
+
+@admin_bp.route("/limpeza-agendamentos")
+@login_required
+def limpeza_agendamentos():
+
+    data_inicio = request.args.get("data_inicio", "").strip()
+    data_fim = request.args.get("data_fim", "").strip()
+    nome = request.args.get("nome", "").strip()
+    cpf = request.args.get("cpf", "").strip()
+    protocolo = request.args.get("protocolo", "").strip()
+    status = request.args.get("status", "").strip()
+
+    query = Agendamento.query
+
+    if data_inicio:
+        try:
+            inicio = datetime.strptime(
+                data_inicio,
+                "%Y-%m-%d"
+            ).date()
+
+            query = query.filter(
+                Agendamento.data >= inicio
+            )
+        except ValueError:
+            data_inicio = ""
+
+    if data_fim:
+        try:
+            fim = datetime.strptime(
+                data_fim,
+                "%Y-%m-%d"
+            ).date()
+
+            query = query.filter(
+                Agendamento.data <= fim
+            )
+        except ValueError:
+            data_fim = ""
+
+    if nome:
+        query = query.filter(
+            Agendamento.nome.ilike(
+                f"%{nome}%"
+            )
+        )
+
+    if cpf:
+        query = query.filter(
+            Agendamento.cpf.ilike(
+                f"%{cpf}%"
+            )
+        )
+
+    if protocolo:
+        query = query.filter(
+            Agendamento.protocolo.ilike(
+                f"%{protocolo}%"
+            )
+        )
+
+    if status:
+        query = query.filter(
+            Agendamento.status == status
+        )
+
+    agendamentos = query.order_by(
+        Agendamento.data.desc(),
+        Agendamento.horario.desc()
+    ).all()
+
+    return render_template(
+        "admin/limpeza_agendamentos.html",
+        agendamentos=agendamentos,
+        data_inicio=data_inicio,
+        data_fim=data_fim,
+        nome=nome,
+        cpf=cpf,
+        protocolo=protocolo,
+        status=status
+    )
+
+@admin_bp.route("/limpeza-agendamentos/excluir", methods=["POST"])
+@login_required
+def excluir_agendamentos():
+
+    ids = request.form.getlist("agendamento_ids")
+
+    if not ids:
+        flash(
+            "Nenhum agendamento foi selecionado.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("admin.limpeza_agendamentos")
+        )
+
+    try:
+        ids = [
+            int(agendamento_id)
+            for agendamento_id in ids
+        ]
+    except ValueError:
+
+        flash(
+            "Seleção de agendamentos inválida.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin.limpeza_agendamentos")
+        )
+
+    agendamentos = (
+        Agendamento.query
+        .filter(
+            Agendamento.id.in_(ids)
+        )
+        .all()
+    )
+
+    if not agendamentos:
+
+        flash(
+            "Nenhum agendamento encontrado.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("admin.limpeza_agendamentos")
+        )
+
+    quantidade = len(agendamentos)
+
+    for agendamento in agendamentos:
+        db.session.delete(agendamento)
+
+    db.session.commit()
+
+    flash(
+        f"{quantidade} agendamento(s) excluído(s) com sucesso.",
+        "success"
+    )
+
+    return redirect(
+        url_for("admin.limpeza_agendamentos")
+    )            
