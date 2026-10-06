@@ -8,3 +8,4 @@ instance/*.db
 .vscode/
 .idea/
 dados_migracao.json
+backups/

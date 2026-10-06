@@ -2595,3 +2595,49 @@ def alterar_status_bloqueio(bloqueio_id):
     return redirect(
         url_for("admin.bloqueios")
     )
+
+@admin_bp.route("/relatorios")
+@login_required
+def relatorios():
+
+    total = Agendamento.query.count()
+
+    atendidos = (
+        Agendamento.query
+        .filter_by(status="atendido")
+        .count()
+    )
+
+    cancelados = (
+        Agendamento.query
+        .filter_by(status="cancelado")
+        .count()
+    )
+
+    nao_compareceu = (
+        Agendamento.query
+        .filter_by(status="nao_compareceu")
+        .count()
+    )
+
+    agendados = (
+        Agendamento.query
+        .filter_by(status="agendado")
+        .count()
+    )
+
+    return render_template(
+        "admin/relatorios.html",
+        total=total,
+        agendados=agendados,
+        atendidos=atendidos,
+        cancelados=cancelados,
+        nao_compareceu=nao_compareceu
+    )
+
+@admin_bp.route("/backup")
+@login_required
+def backup():
+    return render_template(
+        "admin/backup.html"
+    )    

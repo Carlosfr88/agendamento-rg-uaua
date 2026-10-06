@@ -24,14 +24,28 @@
             >
                 + Novo administrador
             </a>
+        
+            <a
+                href="{{ url_for('admin.relatorios') }}"
+                class="button-secondary"
+            >
+                Relatórios
+            </a>
 
+            <a
+                href="{{ url_for('admin.backup') }}"
+                class="button-secondary"
+            >
+                Backup
+            </a>
+        
             <a
                 href="{{ url_for('admin.dashboard') }}"
                 class="button-secondary"
             >
                 Voltar
             </a>
-
+        
         </div>
 
     </header>

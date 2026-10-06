@@ -1,0 +1,260 @@
+```html
+{% extends "base.html" %}
+
+{% block title %}Backup - Painel Administrativo{% endblock %}
+
+{% block content %}
+
+<div class="admin-page">
+
+    <header class="admin-header">
+
+        <div>
+            <h1>Backup</h1>
+
+            <p>
+                Gerenciamento dos backups do sistema.
+            </p>
+        </div>
+
+        <div class="header-actions">
+
+            <a
+                href="{{ url_for('admin.administradores') }}"
+                class="button-secondary"
+            >
+                Voltar
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <section class="content-card">
+
+        <div class="card-header">
+
+            <div>
+                <h2>Backup do banco de dados</h2>
+
+                <p>
+                    Crie uma cópia de segurança dos dados do sistema.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="backup-content">
+
+            <div class="backup-icon">
+                🛡️
+            </div>
+
+            <h3>
+                Backup manual
+            </h3>
+
+            <p>
+                O backup será utilizado para preservar os dados
+                dos agendamentos e demais informações do sistema.
+            </p>
+
+            <button
+                type="button"
+                class="button-primary"
+                disabled
+            >
+                Criar backup
+            </button>
+
+            <p class="backup-info">
+                A função de criação do backup será habilitada
+                na próxima etapa.
+            </p>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<style>
+
+.admin-page {
+    min-height: calc(100vh - 60px);
+    padding: 35px;
+    background: #f5f7fa;
+}
+
+.admin-header {
+    max-width: 1200px;
+    margin: 0 auto 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.admin-header h1 {
+    margin: 0 0 6px;
+
+    font-size: 28px;
+    color: #1f2937;
+}
+
+.admin-header p {
+    margin: 0;
+
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.button-primary,
+.button-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 40px;
+    padding: 0 16px;
+
+    border-radius: 9px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    border: 0;
+
+    transition: 0.2s;
+}
+
+.button-primary {
+    background: #1f2937;
+    color: #ffffff;
+}
+
+.button-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.button-secondary {
+    background: #ffffff;
+    color: #374151;
+
+    border: 1px solid #d8dee6;
+}
+
+.button-secondary:hover {
+    background: #f9fafb;
+}
+
+.content-card {
+    max-width: 1200px;
+    margin: 0 auto;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+    padding: 22px 24px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h2 {
+    margin: 0 0 5px;
+
+    font-size: 18px;
+    color: #1f2937;
+}
+
+.card-header p {
+    margin: 0;
+
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.backup-content {
+    padding: 45px 25px;
+
+    text-align: center;
+}
+
+.backup-icon {
+    font-size: 42px;
+
+    margin-bottom: 15px;
+}
+
+.backup-content h3 {
+    margin: 0 0 10px;
+
+    font-size: 20px;
+    color: #1f2937;
+}
+
+.backup-content p {
+    max-width: 600px;
+
+    margin: 0 auto 20px;
+
+    color: #6b7280;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+.backup-info {
+    font-size: 12px !important;
+
+    color: #9ca3af !important;
+
+    margin-top: 15px !important;
+}
+
+@media (max-width: 700px) {
+
+    .admin-page {
+        padding: 20px 15px;
+    }
+
+    .admin-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
