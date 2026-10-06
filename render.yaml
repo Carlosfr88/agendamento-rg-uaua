@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: agendamento-rg-uaua
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m app.migrar_banco_agenda && gunicorn run:app
