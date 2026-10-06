@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Horários - Agendamento RG{% endblock %}
+{% block title %}Agenda diária - Agendamento RG{% endblock %}
 
 {% block content %}
 
@@ -9,33 +9,47 @@
     <div class="horarios-header">
 
         <div>
+            <span class="page-eyebrow">ADMINISTRAÇÃO</span>
 
             <h1>
-                Datas e horários
+                Agenda diária
             </h1>
 
             <p>
-                Gerencie as datas, horários e vagas disponíveis.
+                Gerencie as datas, janelas de atendimento e capacidade de cada serviço.
             </p>
-
         </div>
 
         <div class="header-actions">
 
             <a
+                href="{{ url_for('admin.gerar_agendas') }}"
+                class="primary-button"
+            >
+                + Gerar agendas
+            </a>
+        
+            <a
                 href="{{ url_for('admin.novo_horario') }}"
                 class="primary-button"
             >
-                + Novo horário
+                + Nova agenda
             </a>
-
+        
+            <a
+                href="{{ url_for('admin.bloqueios') }}"
+                class="secondary-button"
+            >
+                 Bloqueios
+            </a>
+        
             <a
                 href="{{ url_for('admin.dashboard') }}"
                 class="secondary-button"
             >
                 Voltar
             </a>
-
+        
         </div>
 
     </div>
@@ -45,22 +59,30 @@
 
         <div class="filters-card">
 
+            <div class="filters-title">
+                <strong>Filtros</strong>
+                <span>Localize rapidamente uma agenda.</span>
+            </div>
+
             <form method="get" class="filters-form">
-        
+
                 <div class="filter-group">
+
                     <label for="servico_id">
                         Serviço
                     </label>
-        
+
                     <select
                         id="servico_id"
                         name="servico_id"
                     >
+
                         <option value="">
                             Todos os serviços
                         </option>
-        
+
                         {% for servico in servicos %}
+
                             <option
                                 value="{{ servico.id }}"
                                 {% if filtro_servico_id == servico.id %}
@@ -69,48 +91,57 @@
                             >
                                 {{ servico.nome }}
                             </option>
+
                         {% endfor %}
+
                     </select>
+
                 </div>
-        
-        
+
+
                 <div class="filter-group">
+
                     <label for="data_inicial">
                         Data inicial
                     </label>
-        
+
                     <input
                         type="date"
                         id="data_inicial"
                         name="data_inicial"
                         value="{{ filtro_data_inicial }}"
                     >
+
                 </div>
-        
-        
+
+
                 <div class="filter-group">
+
                     <label for="data_final">
                         Data final
                     </label>
-        
+
                     <input
                         type="date"
                         id="data_final"
                         name="data_final"
                         value="{{ filtro_data_final }}"
                     >
+
                 </div>
-        
-        
+
+
                 <div class="filter-group">
+
                     <label for="status">
                         Status
                     </label>
-        
+
                     <select
                         id="status"
                         name="status"
                     >
+
                         <option
                             value=""
                             {% if filtro_status == "" %}
@@ -119,7 +150,7 @@
                         >
                             Todos
                         </option>
-        
+
                         <option
                             value="ativo"
                             {% if filtro_status == "ativo" %}
@@ -128,7 +159,7 @@
                         >
                             Ativos
                         </option>
-        
+
                         <option
                             value="inativo"
                             {% if filtro_status == "inativo" %}
@@ -137,33 +168,52 @@
                         >
                             Inativos
                         </option>
+
                     </select>
+
                 </div>
-        
-        
+
+
                 <div class="filter-actions">
-        
+
                     <button
                         type="submit"
                         class="filter-button"
                     >
                         Filtrar
                     </button>
-        
+
                     <a
                         href="{{ url_for('admin.horarios') }}"
                         class="clear-filter-button"
                     >
                         Limpar
                     </a>
-        
+
                 </div>
-        
+
             </form>
-        
+
         </div>
 
+
         {% if horarios %}
+
+        <div class="agenda-summary">
+
+            <div>
+                <strong>{{ horarios|length }}</strong>
+                <span>
+                    {% if horarios|length == 1 %}
+                        agenda cadastrada
+                    {% else %}
+                        agendas cadastradas
+                    {% endif %}
+                </span>
+            </div>
+
+        </div>
+
 
         <div class="table-wrapper">
 
@@ -182,23 +232,23 @@
                         </th>
 
                         <th>
-                            Horário
+                            Atendimento
                         </th>
 
-                        <th>Capacidade
-
+                        <th>
+                            Capacidade
                         </th>
 
-                        <th>Ocupadas
-
+                        <th>
+                            Ocupadas
                         </th>
 
-                        <th>Disponíveis
-
+                        <th>
+                            Disponíveis
                         </th>
 
-                        <th>Status
-
+                        <th>
+                            Status
                         </th>
 
                         <th>
@@ -209,6 +259,7 @@
 
                 </thead>
 
+
                 <tbody>
 
                     {% for horario in horarios %}
@@ -217,61 +268,106 @@
 
                         <td>
 
-                            <strong>
-                                {{ horario.servico.nome }}
-                            </strong>
+                            <div class="service-cell">
+
+                                <strong>
+                                    {{ horario.servico.nome }}
+                                </strong>
+
+                            </div>
 
                         </td>
 
 
                         <td>
-                            {{ horario.data.strftime('%d/%m/%Y') }}
+
+                            <div class="date-cell">
+
+                                <strong>
+                                    {{ horario.data.strftime('%d/%m/%Y') }}
+                                </strong>
+
+                                <span>
+                                    {{ horario.data.strftime('%A') }}
+                                </span>
+
+                            </div>
+
                         </td>
 
 
                         <td>
-                            {{ horario.hora.strftime('%H:%M') }}
+
+                            <div class="time-cell">
+
+                                <strong>
+                                    {{ horario.hora_inicio.strftime('%H:%M') }}
+                                    -
+                                    {{ horario.hora_fim.strftime('%H:%M') }}
+                                </strong>
+
+                                <span>
+                                    Janela de atendimento
+                                </span>
+
+                            </div>
+
                         </td>
 
 
                         <td>
-                            <strong>
+
+                            <span class="number-badge capacity">
                                 {{ horario.capacidade }}
-                            </strong>
+                            </span>
+
                         </td>
-                        
+
+
                         <td>
-                            <span class="occupancy-count">
+
+                            <span class="number-badge occupied">
                                 {{ horario.ocupadas }}
                             </span>
+
                         </td>
-                        
+
+
                         <td>
+
                             {% if horario.disponiveis > 0 %}
-                        
-                                <span class="availability-count available">
+
+                                <span class="number-badge available">
                                     {{ horario.disponiveis }}
                                 </span>
-                        
+
                             {% else %}
-                        
-                                <span class="availability-count full">
+
+                                <span class="number-badge full">
                                     0
                                 </span>
-                        
+
                             {% endif %}
+
                         </td>
-                        
+
+
                         <td>
+
                             {% if horario.ativo %}
+
                                 <span class="status active">
                                     Ativo
                                 </span>
+
                             {% else %}
+
                                 <span class="status inactive">
                                     Inativo
                                 </span>
+
                             {% endif %}
+
                         </td>
 
 
@@ -297,11 +393,12 @@
                                         horario_id=horario.id
                                     ) }}"
                                 >
-                                <input
-                                    type="hidden"
-                                    name="csrf_token"
-                                    value="{{ csrf_token() }}"
-                                >
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="{{ csrf_token() }}"
+                                    >
 
                                     {% if horario.ativo %}
 
@@ -348,18 +445,18 @@
             </div>
 
             <h2>
-                Nenhum horário cadastrado
+                Nenhuma agenda cadastrada
             </h2>
 
             <p>
-                Cadastre o primeiro horário disponível.
+                Cadastre uma data para começar a disponibilizar horários para agendamento.
             </p>
 
             <a
                 href="{{ url_for('admin.novo_horario') }}"
                 class="primary-button"
             >
-                Criar horário
+                Criar agenda
             </a>
 
         </div>
@@ -373,156 +470,8 @@
 
 <style>
 
-        .occupancy-count,
-    .availability-count {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 32px;
-        height: 28px;
-        padding: 0 8px;
-        border-radius: 7px;
-        font-size: 13px;
-        font-weight: 700;
-    }
-
-    .occupancy-count {
-        background: #f3f4f6;
-        color: #374151;
-    }
-
-    .availability-count.available {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .availability-count.full {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .filters-card {
-        margin-bottom: 24px;
-        padding: 20px;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        background: #f8fafc;
-    }
-    
-    .filters-form {
-        display: grid;
-        grid-template-columns:
-            minmax(180px, 1.4fr)
-            minmax(150px, 1fr)
-            minmax(150px, 1fr)
-            minmax(150px, 1fr)
-            auto;
-        gap: 16px;
-        align-items: end;
-    }
-    
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        gap: 7px;
-    }
-    
-    .filter-group label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #374151;
-    }
-    
-    .filter-group select,
-    .filter-group input {
-        width: 100%;
-        min-height: 42px;
-        padding: 0 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        background: #ffffff;
-        color: #111827;
-        font-size: 14px;
-        box-sizing: border-box;
-    }
-    
-    .filter-group select:focus,
-    .filter-group input:focus {
-        outline: none;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
-    }
-    
-    .filter-actions {
-        display: flex;
-        gap: 8px;
-    }
-    
-    .filter-button,
-    .clear-filter-button {
-        min-height: 42px;
-        padding: 0 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-    }
-    
-    .filter-button {
-        border: 1px solid #2563eb;
-        background: #2563eb;
-        color: #ffffff;
-    }
-    
-    .filter-button:hover {
-        background: #1d4ed8;
-    }
-    
-    .clear-filter-button {
-        border: 1px solid #d1d5db;
-        background: #ffffff;
-        color: #374151;
-    }
-    
-    .clear-filter-button:hover {
-        background: #f3f4f6;
-    }
-    
-    @media (max-width: 1000px) {
-    
-        .filters-form {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    
-        .filter-actions {
-            grid-column: span 2;
-        }
-    }
-    
-    @media (max-width: 600px) {
-    
-        .filters-form {
-            grid-template-columns: 1fr;
-        }
-    
-        .filter-actions {
-            grid-column: auto;
-            width: 100%;
-        }
-    
-        .filter-button,
-        .clear-filter-button {
-            flex: 1;
-        }
-    }    
-
 .horarios-page {
-    max-width: 1200px;
+    max-width: 1250px;
     margin: 0 auto;
     padding: 40px 20px;
 }
@@ -535,15 +484,24 @@
     margin-bottom: 25px;
 }
 
+.page-eyebrow {
+    display: block;
+    margin-bottom: 6px;
+    color: #1f7a8c;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+
 .horarios-header h1 {
     margin: 0 0 6px;
-    color: #1f2937;
+    color: #17212b;
     font-size: 28px;
 }
 
 .horarios-header p {
     margin: 0;
-    color: #6b7280;
+    color: #65717d;
     font-size: 14px;
 }
 
@@ -572,13 +530,13 @@
 }
 
 .primary-button {
-    border: 1px solid #1f2937;
-    background: #1f2937;
+    border: 1px solid #123b5d;
+    background: #123b5d;
     color: #ffffff;
 }
 
 .primary-button:hover {
-    background: #111827;
+    background: #0b2941;
 }
 
 .secondary-button {
@@ -593,10 +551,141 @@
 
 .horarios-card {
     background: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e1e6eb;
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+.filters-card {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #e1e6eb;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.filters-title {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 16px;
+}
+
+.filters-title strong {
+    color: #17212b;
+    font-size: 15px;
+}
+
+.filters-title span {
+    color: #65717d;
+    font-size: 12px;
+}
+
+.filters-form {
+    display: grid;
+    grid-template-columns:
+        minmax(180px, 1.4fr)
+        minmax(150px, 1fr)
+        minmax(150px, 1fr)
+        minmax(150px, 1fr)
+        auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: #1f7a8c;
+    box-shadow: 0 0 0 3px rgba(31, 122, 140, 0.10);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-button,
+.clear-filter-button {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.filter-button {
+    border: 1px solid #123b5d;
+    background: #123b5d;
+    color: #ffffff;
+}
+
+.filter-button:hover {
+    background: #0b2941;
+}
+
+.clear-filter-button {
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+}
+
+.clear-filter-button:hover {
+    background: #f3f4f6;
+}
+
+.agenda-summary {
+    display: flex;
+    align-items: center;
+    padding: 0 20px 16px;
+}
+
+.agenda-summary div {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+}
+
+.agenda-summary strong {
+    color: #123b5d;
+    font-size: 18px;
+}
+
+.agenda-summary span {
+    color: #65717d;
+    font-size: 13px;
 }
 
 .table-wrapper {
@@ -607,6 +696,7 @@
 table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 1050px;
 }
 
 thead {
@@ -616,11 +706,13 @@ thead {
 th {
     padding: 14px 16px;
     text-align: left;
+    border-top: 1px solid #e5e7eb;
     border-bottom: 1px solid #e5e7eb;
     color: #374151;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: .3px;
 }
 
 td {
@@ -636,7 +728,61 @@ tbody tr:last-child td {
 }
 
 tbody tr:hover {
-    background: #fafafa;
+    background: #fafcfd;
+}
+
+.service-cell strong {
+    color: #17212b;
+}
+
+.date-cell,
+.time-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.date-cell strong,
+.time-cell strong {
+    color: #17212b;
+}
+
+.date-cell span,
+.time-cell span {
+    color: #8a949d;
+    font-size: 11px;
+}
+
+.number-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 30px;
+    padding: 0 9px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.number-badge.capacity {
+    background: #eef2f7;
+    color: #374151;
+}
+
+.number-badge.occupied {
+    background: #fff7ed;
+    color: #9a3412;
+}
+
+.number-badge.available {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.number-badge.full {
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 .status {
@@ -734,6 +880,18 @@ tbody tr:hover {
     font-size: 14px;
 }
 
+@media (max-width: 1000px) {
+
+    .filters-form {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filter-actions {
+        grid-column: span 2;
+    }
+
+}
+
 @media (max-width: 700px) {
 
     .horarios-page {
@@ -753,19 +911,23 @@ tbody tr:hover {
         flex: 1;
     }
 
+    .filters-form {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        grid-column: auto;
+        width: 100%;
+    }
+
+    .filter-button,
+    .clear-filter-button {
+        flex: 1;
+    }
+
     th,
     td {
         padding: 12px 10px;
-    }
-
-    .actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .actions .edit-button,
-    .actions button {
-        width: 100%;
     }
 
 }

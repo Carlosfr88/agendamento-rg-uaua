@@ -135,6 +135,18 @@
                                 <a
                                     href="{{
                                         url_for(
+                                            'admin.dias_atendimento',
+                                            servico_id=servico.id
+                                        )
+                                    }}"
+                                    class="button-edit"
+                                >
+                                    Dias
+                                </a>
+
+                                <a
+                                    href="{{
+                                        url_for(
                                             'admin.editar_servico',
                                             servico_id=servico.id
                                         )
@@ -156,10 +168,10 @@
                                     class="status-form"
                                 >
                                 <input
-                                    type="hidden"
-                                    name="csrf_token"
-                                    value="{{ csrf_token() }}"
-                                >
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token() }}"
+                            >
 
                                     {% if servico.ativo %}
 

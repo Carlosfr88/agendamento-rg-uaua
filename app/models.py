@@ -1,3 +1,5 @@
+from datetime import time
+
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -128,6 +130,19 @@ class Agendamento(db.Model):
         nullable=True
     )
 
+    endereco = db.Column(
+    db.String(255),
+    nullable=True
+
+    )
+
+    classificacao = db.Column(
+        db.String(30),
+        nullable=False,
+        default="normal",
+        server_default="normal"
+    )
+
     status = db.Column(
         db.String(30),
         default="agendado",
@@ -194,6 +209,61 @@ class HorarioDisponivel(db.Model):
     )    
 
 # ==========================================================
+# AGENDA DIÁRIA
+# ==========================================================
+
+class AgendaDiaria(db.Model):
+    __tablename__ = "agendas_diarias"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    servico_id = db.Column(
+        db.Integer,
+        db.ForeignKey("servicos.id"),
+        nullable=False
+    )
+
+    data = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    hora_inicio = db.Column(
+        db.Time,
+        nullable=False,
+        default=time(8, 0)
+    )
+
+    hora_fim = db.Column(
+        db.Time,
+        nullable=False,
+        default=time(14, 0)
+    )
+
+    capacidade = db.Column(
+        db.Integer,
+        nullable=False,
+        default=30
+    )
+
+    ativo = db.Column(
+        db.Boolean,
+        default=True,
+        nullable=False
+    )
+
+    servico = db.relationship(
+        "Servico",
+        backref=db.backref(
+            "agendas_diarias",
+            lazy=True
+        )
+    )
+
+# ==========================================================
 # INFORMAÇÕES PÚBLICAS
 # ==========================================================
 
@@ -225,4 +295,99 @@ class Informacao(db.Model):
         db.Boolean,
         default=True,
         nullable=False
-    )    
+    ) 
+
+# ==========================================================
+# DIAS DE ATENDIMENTO
+# ==========================================================
+
+class DiaAtendimento(db.Model):
+    __tablename__ = "dias_atendimento"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    servico_id = db.Column(
+        db.Integer,
+        db.ForeignKey("servicos.id"),
+        nullable=False
+    )
+
+    dia_semana = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    ativo = db.Column(
+        db.Boolean,
+        default=True,
+        nullable=False
+    )
+
+    servico = db.relationship(
+        "Servico",
+        backref=db.backref(
+            "dias_atendimento",
+            lazy=True
+        )
+    )
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            "servico_id",
+            "dia_semana",
+            name="uq_servico_dia_semana"
+        ),
+    )
+
+# ==========================================================
+# BLOQUEIOS DE DATAS
+# ==========================================================
+
+class BloqueioData(db.Model):
+    __tablename__ = "bloqueios_datas"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    servico_id = db.Column(
+        db.Integer,
+        db.ForeignKey("servicos.id"),
+        nullable=False
+    )
+
+    data = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    motivo = db.Column(
+        db.String(255),
+        nullable=True
+    )
+
+    ativo = db.Column(
+        db.Boolean,
+        default=True,
+        nullable=False
+    )
+
+    servico = db.relationship(
+        "Servico",
+        backref=db.backref(
+            "bloqueios_datas",
+            lazy=True
+        )
+    )
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            "servico_id",
+            "data",
+            name="uq_servico_data_bloqueio"
+        ),
+    )           

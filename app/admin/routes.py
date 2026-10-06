@@ -1,4 +1,4 @@
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 
 from flask import (
     Blueprint,
@@ -19,8 +19,11 @@ from ..models import (
     User,
     Servico,
     HorarioDisponivel,
+    AgendaDiaria,
     Agendamento,
-    Informacao
+    Informacao,
+    DiaAtendimento,
+    BloqueioData
 )
 
 
@@ -85,6 +88,10 @@ def dashboard():
         "data_fim",
         ""
     ).strip()
+
+    if not data_inicio and not data_fim:
+        data_inicio = date.today().isoformat()
+        data_fim = date.today().isoformat()
 
     # --------------------------------------------------------
     # CONSULTA PRINCIPAL
@@ -681,109 +688,150 @@ def alterar_status_administrador(usuario_id):
     )
 
 # ============================================================
-# HORÁRIOS DISPONÍVEIS
+# AGENDA DIÁRIA
 # ============================================================
 
 @admin_bp.route("/horarios")
 @login_required
 def horarios():
 
-    servico_id = request.args.get("servico_id", type=int)
-    data_inicial = request.args.get("data_inicial", "").strip()
-    data_final = request.args.get("data_final", "").strip()
-    status = request.args.get("status", "").strip()
+    servico_id = request.args.get(
+        "servico_id",
+        type=int
+    )
 
-    query = HorarioDisponivel.query
+    data_inicial = request.args.get(
+        "data_inicial",
+        ""
+    ).strip()
 
-    # Filtro por serviço
+    data_final = request.args.get(
+        "data_final",
+        ""
+    ).strip()
+
+    status = request.args.get(
+        "status",
+        ""
+    ).strip()
+
+    query = AgendaDiaria.query
+
+    # --------------------------------------------------------
+    # FILTRO POR SERVIÇO
+    # --------------------------------------------------------
+
     if servico_id:
         query = query.filter(
-            HorarioDisponivel.servico_id == servico_id
+            AgendaDiaria.servico_id == servico_id
         )
 
-    # Filtro por data inicial
-    data_inicial_obj = None
+    # --------------------------------------------------------
+    # FILTRO POR DATA INICIAL
+    # --------------------------------------------------------
 
     if data_inicial:
+
         try:
+
             data_inicial_obj = datetime.strptime(
                 data_inicial,
                 "%Y-%m-%d"
             ).date()
 
             query = query.filter(
-                HorarioDisponivel.data >= data_inicial_obj
+                AgendaDiaria.data >= data_inicial_obj
             )
 
         except ValueError:
+
             flash(
                 "A data inicial informada é inválida.",
                 "danger"
             )
 
-    # Filtro por data final
-    data_final_obj = None
+    # --------------------------------------------------------
+    # FILTRO POR DATA FINAL
+    # --------------------------------------------------------
 
     if data_final:
+
         try:
+
             data_final_obj = datetime.strptime(
                 data_final,
                 "%Y-%m-%d"
             ).date()
 
             query = query.filter(
-                HorarioDisponivel.data <= data_final_obj
+                AgendaDiaria.data <= data_final_obj
             )
 
         except ValueError:
+
             flash(
                 "A data final informada é inválida.",
                 "danger"
             )
 
-    # Filtro por status
+    # --------------------------------------------------------
+    # FILTRO POR STATUS
+    # --------------------------------------------------------
+
     if status == "ativo":
+
         query = query.filter(
-            HorarioDisponivel.ativo.is_(True)
+            AgendaDiaria.ativo.is_(True)
         )
 
     elif status == "inativo":
+
         query = query.filter(
-            HorarioDisponivel.ativo.is_(False)
+            AgendaDiaria.ativo.is_(False)
         )
 
-    horarios = (
+    agendas = (
         query
         .order_by(
-            HorarioDisponivel.data.asc(),
-            HorarioDisponivel.hora.asc()
+            AgendaDiaria.data.asc(),
+            AgendaDiaria.hora_inicio.asc()
         )
         .all()
     )
 
-    for horario in horarios:
+    # --------------------------------------------------------
+    # CALCULA OCUPAÇÃO E DISPONIBILIDADE
+    # --------------------------------------------------------
 
-        horario.ocupadas = Agendamento.query.filter(
-            Agendamento.servico_id == horario.servico_id,
-            Agendamento.data == horario.data,
-            Agendamento.horario == horario.hora,
-            Agendamento.status != "cancelado"
-        ).count()
+    for agenda in agendas:
 
-        horario.disponiveis = max(
-            horario.capacidade - horario.ocupadas,
+        agenda.ocupadas = (
+            Agendamento.query
+            .filter(
+                Agendamento.servico_id == agenda.servico_id,
+                Agendamento.data == agenda.data,
+                Agendamento.status != "cancelado"
+            )
+            .count()
+        )
+
+        agenda.disponiveis = max(
+            agenda.capacidade - agenda.ocupadas,
             0
         )
 
     servicos = (
         Servico.query
-        .order_by(Servico.nome.asc())
+        .order_by(
+            Servico.nome.asc()
+        )
         .all()
     )
 
     return render_template(
         "admin/horarios.html",
-        horarios=horarios,
+        horarios=agendas,
+        agendas=agendas,
         servicos=servicos,
         filtro_servico_id=servico_id,
         filtro_data_inicial=data_inicial,
@@ -791,8 +839,9 @@ def horarios():
         filtro_status=status
     )
 
+
 # ============================================================
-# NOVO HORÁRIO
+# NOVA AGENDA DIÁRIA
 # ============================================================
 
 @admin_bp.route(
@@ -801,6 +850,8 @@ def horarios():
 )
 @login_required
 def novo_horario():
+
+    hoje = date.today()
 
     servicos = (
         Servico.query
@@ -822,15 +873,24 @@ def novo_horario():
             ""
         ).strip()
 
-        hora = request.form.get(
-            "hora",
-            ""
+        hora_inicio = request.form.get(
+            "hora_inicio",
+            "08:00"
+        ).strip()
+
+        hora_fim = request.form.get(
+            "hora_fim",
+            "14:00"
         ).strip()
 
         capacidade = request.form.get(
             "capacidade",
             type=int
         )
+
+        # ----------------------------------------------------
+        # VALIDAÇÕES
+        # ----------------------------------------------------
 
         if not servico_id:
 
@@ -841,7 +901,8 @@ def novo_horario():
 
             return render_template(
                 "admin/novo_horario.html",
-                servicos=servicos
+                servicos=servicos,
+                hoje=hoje
             )
 
         if not data:
@@ -853,19 +914,8 @@ def novo_horario():
 
             return render_template(
                 "admin/novo_horario.html",
-                servicos=servicos
-            )
-
-        if not hora:
-
-            flash(
-                "Informe o horário.",
-                "danger"
-            )
-
-            return render_template(
-                "admin/novo_horario.html",
-                servicos=servicos
+                servicos=servicos,
+                hoje=hoje
             )
 
         if not capacidade or capacidade < 1:
@@ -877,7 +927,8 @@ def novo_horario():
 
             return render_template(
                 "admin/novo_horario.html",
-                servicos=servicos
+                servicos=servicos,
+                hoje=hoje
             )
 
         try:
@@ -887,8 +938,34 @@ def novo_horario():
                 "%Y-%m-%d"
             ).date()
 
-            hora_obj = datetime.strptime(
-                hora,
+            # ------------------------------------------------
+            # BLOQUEIA FINAIS DE SEMANA
+            # ------------------------------------------------
+
+            if data_obj.weekday() >= 5:
+
+                flash(
+                    "Não é permitido cadastrar agenda aos sábados ou domingos.",
+                    "danger"
+                )
+
+                return render_template(
+                    "admin/novo_horario.html",
+                    servicos=servicos,
+                    hoje=hoje
+                )
+
+            # ------------------------------------------------
+            # CONVERTE HORÁRIOS
+            # ------------------------------------------------
+
+            hora_inicio_obj = datetime.strptime(
+                hora_inicio,
+                "%H:%M"
+            ).time()
+
+            hora_fim_obj = datetime.strptime(
+                hora_fim,
                 "%H:%M"
             ).time()
 
@@ -901,8 +978,30 @@ def novo_horario():
 
             return render_template(
                 "admin/novo_horario.html",
-                servicos=servicos
+                servicos=servicos,
+                hoje=hoje
             )
+
+        # ----------------------------------------------------
+        # VALIDA HORÁRIO
+        # ----------------------------------------------------
+
+        if hora_inicio_obj >= hora_fim_obj:
+
+            flash(
+                "O horário inicial deve ser anterior ao horário final.",
+                "danger"
+            )
+
+            return render_template(
+                "admin/novo_horario.html",
+                servicos=servicos,
+                hoje=hoje
+            )
+
+        # ----------------------------------------------------
+        # LOCALIZA SERVIÇO
+        # ----------------------------------------------------
 
         servico = Servico.query.get(
             servico_id
@@ -917,15 +1016,19 @@ def novo_horario():
 
             return render_template(
                 "admin/novo_horario.html",
-                servicos=servicos
+                servicos=servicos,
+                hoje=hoje
             )
 
+        # ----------------------------------------------------
+        # IMPOSSIBILITA DUPLICIDADE
+        # ----------------------------------------------------
+
         existente = (
-            HorarioDisponivel.query
+            AgendaDiaria.query
             .filter_by(
                 servico_id=servico_id,
-                data=data_obj,
-                hora=hora_obj
+                data=data_obj
             )
             .first()
         )
@@ -933,31 +1036,37 @@ def novo_horario():
         if existente:
 
             flash(
-                "Este horário já está cadastrado para este serviço.",
+                "Já existe uma agenda cadastrada para este serviço nesta data.",
                 "danger"
             )
 
             return render_template(
                 "admin/novo_horario.html",
-                servicos=servicos
+                servicos=servicos,
+                hoje=hoje
             )
 
-        horario = HorarioDisponivel(
+        # ----------------------------------------------------
+        # CRIA AGENDA
+        # ----------------------------------------------------
+
+        agenda = AgendaDiaria(
             servico_id=servico_id,
             data=data_obj,
-            hora=hora_obj,
+            hora_inicio=hora_inicio_obj,
+            hora_fim=hora_fim_obj,
             capacidade=capacidade,
             ativo=True
         )
 
         db.session.add(
-            horario
+            agenda
         )
 
         db.session.commit()
 
         flash(
-            "Horário cadastrado com sucesso.",
+            "Agenda diária cadastrada com sucesso.",
             "success"
         )
 
@@ -969,12 +1078,13 @@ def novo_horario():
 
     return render_template(
         "admin/novo_horario.html",
-        servicos=servicos
+        servicos=servicos,
+        hoje=hoje
     )
 
 
 # ============================================================
-# EDITAR HORÁRIO
+# EDITAR AGENDA DIÁRIA
 # ============================================================
 
 @admin_bp.route(
@@ -984,8 +1094,8 @@ def novo_horario():
 @login_required
 def editar_horario(horario_id):
 
-    horario = (
-        HorarioDisponivel.query.get_or_404(
+    agenda = (
+        AgendaDiaria.query.get_or_404(
             horario_id
         )
     )
@@ -1010,9 +1120,14 @@ def editar_horario(horario_id):
             ""
         ).strip()
 
-        hora = request.form.get(
-            "hora",
-            ""
+        hora_inicio = request.form.get(
+            "hora_inicio",
+            "08:00"
+        ).strip()
+
+        hora_fim = request.form.get(
+            "hora_fim",
+            "14:00"
         ).strip()
 
         capacidade = request.form.get(
@@ -1029,7 +1144,8 @@ def editar_horario(horario_id):
 
             return render_template(
                 "admin/editar_horario.html",
-                horario=horario,
+                horario=agenda,
+                agenda=agenda,
                 servicos=servicos
             )
 
@@ -1042,20 +1158,8 @@ def editar_horario(horario_id):
 
             return render_template(
                 "admin/editar_horario.html",
-                horario=horario,
-                servicos=servicos
-            )
-
-        if not hora:
-
-            flash(
-                "Informe o horário.",
-                "danger"
-            )
-
-            return render_template(
-                "admin/editar_horario.html",
-                horario=horario,
+                horario=agenda,
+                agenda=agenda,
                 servicos=servicos
             )
 
@@ -1068,7 +1172,8 @@ def editar_horario(horario_id):
 
             return render_template(
                 "admin/editar_horario.html",
-                horario=horario,
+                horario=agenda,
+                agenda=agenda,
                 servicos=servicos
             )
 
@@ -1079,8 +1184,40 @@ def editar_horario(horario_id):
                 "%Y-%m-%d"
             ).date()
 
-            hora_obj = datetime.strptime(
-                hora,
+            # Não permite agenda aos finais de semana
+            if data_obj.weekday() >= 5:
+                flash(
+                    "Não é permitido utilizar sábado ou domingo como dia de atendimento.",
+                    "danger"
+                )
+
+                ocupadas = (
+                    Agendamento.query
+                    .filter(
+                        Agendamento.servico_id == agenda.servico_id,
+                        Agendamento.data == agenda.data,
+                        Agendamento.status != "cancelado"
+                    )
+                    .count()
+                )
+
+                agenda.ocupadas = ocupadas
+                agenda.disponiveis = max(agenda.capacidade - ocupadas, 0)
+
+                return render_template(
+                    "admin/editar_horario.html",
+                    horario=agenda,
+                    agenda=agenda,
+                    servicos=servicos
+                )
+
+            hora_inicio_obj = datetime.strptime(
+                hora_inicio,
+                "%H:%M"
+            ).time()
+
+            hora_fim_obj = datetime.strptime(
+                hora_fim,
                 "%H:%M"
             ).time()
 
@@ -1093,7 +1230,22 @@ def editar_horario(horario_id):
 
             return render_template(
                 "admin/editar_horario.html",
-                horario=horario,
+                horario=agenda,
+                agenda=agenda,
+                servicos=servicos
+            )
+
+        if hora_inicio_obj >= hora_fim_obj:
+
+            flash(
+                "O horário inicial deve ser anterior ao horário final.",
+                "danger"
+            )
+
+            return render_template(
+                "admin/editar_horario.html",
+                horario=agenda,
+                agenda=agenda,
                 servicos=servicos
             )
 
@@ -1110,17 +1262,17 @@ def editar_horario(horario_id):
 
             return render_template(
                 "admin/editar_horario.html",
-                horario=horario,
+                horario=agenda,
+                agenda=agenda,
                 servicos=servicos
             )
 
         existente = (
-            HorarioDisponivel.query
+            AgendaDiaria.query
             .filter(
-                HorarioDisponivel.servico_id == servico_id,
-                HorarioDisponivel.data == data_obj,
-                HorarioDisponivel.hora == hora_obj,
-                HorarioDisponivel.id != horario.id
+                AgendaDiaria.servico_id == servico_id,
+                AgendaDiaria.data == data_obj,
+                AgendaDiaria.id != agenda.id
             )
             .first()
         )
@@ -1128,25 +1280,55 @@ def editar_horario(horario_id):
         if existente:
 
             flash(
-                "Já existe outro horário com estes mesmos dados.",
+                "Já existe outra agenda para este serviço nesta data.",
                 "danger"
             )
 
             return render_template(
                 "admin/editar_horario.html",
-                horario=horario,
+                horario=agenda,
+                agenda=agenda,
                 servicos=servicos
             )
 
-        horario.servico_id = servico_id
-        horario.data = data_obj
-        horario.hora = hora_obj
-        horario.capacidade = capacidade
+        # Não permite reduzir a capacidade abaixo do número
+        # de pessoas que já possuem agendamento ativo.
+        ocupadas = (
+            Agendamento.query
+            .filter(
+                Agendamento.servico_id == agenda.servico_id,
+                Agendamento.data == agenda.data,
+                Agendamento.status != "cancelado"
+            )
+            .count()
+        )
+
+        if capacidade < ocupadas:
+            flash(
+                f"A capacidade não pode ser menor que {ocupadas}, "
+                f"pois já existem {ocupadas} agendamento(s) nesta data.",
+                "danger"
+            )
+            agenda.ocupadas = ocupadas
+            agenda.disponiveis = max(agenda.capacidade - ocupadas, 0)
+
+            return render_template(
+                "admin/editar_horario.html",
+                horario=agenda,
+                agenda=agenda,
+                servicos=servicos
+            )    
+
+        agenda.servico_id = servico_id
+        agenda.data = data_obj
+        agenda.hora_inicio = hora_inicio_obj
+        agenda.hora_fim = hora_fim_obj
+        agenda.capacidade = capacidade
 
         db.session.commit()
 
         flash(
-            "Horário atualizado com sucesso.",
+            "Agenda diária atualizada com sucesso.",
             "success"
         )
 
@@ -1158,13 +1340,14 @@ def editar_horario(horario_id):
 
     return render_template(
         "admin/editar_horario.html",
-        horario=horario,
+        horario=agenda,
+        agenda=agenda,
         servicos=servicos
     )
 
 
 # ============================================================
-# ATIVAR / DESATIVAR HORÁRIO
+# ATIVAR / DESATIVAR AGENDA DIÁRIA
 # ============================================================
 
 @admin_bp.route(
@@ -1174,27 +1357,27 @@ def editar_horario(horario_id):
 @login_required
 def alterar_status_horario(horario_id):
 
-    horario = (
-        HorarioDisponivel.query.get_or_404(
+    agenda = (
+        AgendaDiaria.query.get_or_404(
             horario_id
         )
     )
 
-    horario.ativo = not horario.ativo
+    agenda.ativo = not agenda.ativo
 
     db.session.commit()
 
-    if horario.ativo:
+    if agenda.ativo:
 
         flash(
-            "Horário ativado com sucesso.",
+            "Agenda diária ativada com sucesso.",
             "success"
         )
 
     else:
 
         flash(
-            "Horário desativado com sucesso.",
+            "Agenda diária desativada com sucesso.",
             "success"
         )
 
@@ -1203,6 +1386,7 @@ def alterar_status_horario(horario_id):
             "admin.horarios"
         )
     )
+
 
 # ============================================================
 # INFORMAÇÕES PÚBLICAS
@@ -1969,3 +2153,445 @@ def novo_administrador():
             url_for("admin.importar_dados")
         )
 
+# ==========================================================
+# DIAS DE ATENDIMENTO POR SERVIÇO
+# ==========================================================
+
+@admin_bp.route(
+    "/servicos/<int:servico_id>/dias-atendimento",
+    methods=["GET", "POST"]
+)
+@login_required
+def dias_atendimento(servico_id):
+
+    servico = Servico.query.get_or_404(servico_id)
+
+    dias = (
+        DiaAtendimento.query
+        .filter_by(servico_id=servico.id)
+        .order_by(DiaAtendimento.dia_semana)
+        .all()
+    )
+
+    if request.method == "POST":
+
+        dias_selecionados = request.form.getlist(
+            "dias"
+        )
+
+        for dia in dias:
+
+            dia.ativo = str(
+                dia.dia_semana
+            ) in dias_selecionados
+
+        db.session.commit()
+
+        flash(
+            "Dias de atendimento atualizados com sucesso.",
+            "success"
+        )
+
+        return redirect(
+            url_for(
+                "admin.dias_atendimento",
+                servico_id=servico.id
+            )
+        )
+
+    nomes_dias = [
+        "Segunda-feira",
+        "Terça-feira",
+        "Quarta-feira",
+        "Quinta-feira",
+        "Sexta-feira",
+        "Sábado",
+        "Domingo"
+    ]
+
+    return render_template(
+        "admin/dias_atendimento.html",
+        servico=servico,
+        dias=dias,
+        nomes_dias=nomes_dias
+    )
+
+# ==========================================================
+# GERAÇÃO AUTOMÁTICA DE AGENDAS
+# ==========================================================
+
+@admin_bp.route(
+    "/agendas/gerar",
+    methods=["GET", "POST"]
+)
+@login_required
+def gerar_agendas():
+
+    hoje = date.today()
+
+    servicos = (
+        Servico.query
+        .filter_by(ativo=True)
+        .order_by(Servico.nome)
+        .all()
+    )
+
+    if request.method == "POST":
+
+        servico_id = request.form.get("servico_id")
+        data_inicial = request.form.get("data_inicial")
+        data_final = request.form.get("data_final")
+        hora_inicio = request.form.get(
+            "hora_inicio",
+            "08:00"
+        )
+        hora_fim = request.form.get(
+            "hora_fim",
+            "14:00"
+        )
+        capacidade = request.form.get("capacidade")
+
+        # --------------------------------------------------
+        # VALIDAÇÕES
+        # --------------------------------------------------
+
+        if not servico_id:
+            flash(
+                "Selecione um serviço.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.gerar_agendas")
+            )
+
+        if not data_inicial or not data_final:
+            flash(
+                "Informe a data inicial e a data final.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.gerar_agendas")
+            )
+
+        if not capacidade:
+            flash(
+                "Informe a capacidade diária.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.gerar_agendas")
+            )
+
+        try:
+            servico_id = int(servico_id)
+            capacidade = int(capacidade)
+
+            data_inicial = date.fromisoformat(
+                data_inicial
+            )
+
+            data_final = date.fromisoformat(
+                data_final
+            )
+
+            hora_inicio = time.fromisoformat(
+                hora_inicio
+            )
+
+            hora_fim = time.fromisoformat(
+                hora_fim
+            )
+
+        except (ValueError, TypeError):
+            flash(
+                "Os dados informados são inválidos.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.gerar_agendas")
+            )
+
+        servico = Servico.query.get_or_404(
+            servico_id
+        )
+
+        if not servico.ativo:
+            flash(
+                "O serviço selecionado está inativo.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.gerar_agendas")
+            )
+
+        if data_inicial > data_final:
+            flash(
+                "A data inicial não pode ser maior que a data final.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.gerar_agendas")
+            )
+
+        if capacidade <= 0:
+            flash(
+                "A capacidade deve ser maior que zero.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.gerar_agendas")
+            )
+
+        if hora_inicio >= hora_fim:
+            flash(
+                "O horário inicial deve ser menor que o horário final.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.gerar_agendas")
+            )
+
+        # --------------------------------------------------
+        # DIAS DE ATENDIMENTO
+        # --------------------------------------------------
+
+        dias_ativos = {
+            dia.dia_semana
+            for dia in DiaAtendimento.query.filter_by(
+                servico_id=servico.id,
+                ativo=True
+            ).all()
+        }
+
+        if not dias_ativos:
+            flash(
+                "Este serviço não possui dias de atendimento ativos.",
+                "warning"
+            )
+            return redirect(
+                url_for("admin.gerar_agendas")
+            )
+
+        # --------------------------------------------------
+        # GERAÇÃO
+        # --------------------------------------------------
+
+        data_atual = data_inicial
+        criadas = 0
+        existentes = 0
+        ignoradas = 0
+
+        while data_atual <= data_final:
+
+            # Dia não configurado para atendimento
+            if data_atual.weekday() not in dias_ativos:
+                ignoradas += 1
+                data_atual += timedelta(days=1)
+                continue
+
+                        # Data bloqueada para este serviço
+            bloqueio = (
+                BloqueioData.query
+                .filter_by(
+                    servico_id=servico.id,
+                    data=data_atual,
+                    ativo=True
+                )
+                .first()
+            )
+
+            if bloqueio:
+                ignoradas += 1
+                data_atual += timedelta(days=1)
+                continue    
+
+            agenda_existente = (
+                AgendaDiaria.query
+                .filter_by(
+                    servico_id=servico.id,
+                    data=data_atual
+                )
+                .first()
+            )
+
+            if agenda_existente:
+                existentes += 1
+                data_atual += timedelta(days=1)
+                continue
+
+            agenda = AgendaDiaria(
+                servico_id=servico.id,
+                data=data_atual,
+                hora_inicio=hora_inicio,
+                hora_fim=hora_fim,
+                capacidade=capacidade,
+                ativo=True
+            )
+
+            db.session.add(agenda)
+
+            criadas += 1
+
+            data_atual += timedelta(days=1)
+
+        db.session.commit()
+
+        flash(
+            f"Geração concluída: "
+            f"{criadas} agenda(s) criada(s), "
+            f"{existentes} já existente(s) e "
+            f"{ignoradas} dia(s) fora do atendimento.",
+            "success"
+        )
+
+        return redirect(
+            url_for("admin.horarios")
+        )
+
+    return render_template(
+        "admin/gerar_agendas.html",
+        servicos=servicos,
+        hoje=hoje
+    )
+
+# ==========================================================
+# BLOQUEIOS DE DATAS
+# ==========================================================
+
+@admin_bp.route(
+    "/bloqueios",
+    methods=["GET", "POST"]
+)
+@login_required
+def bloqueios():
+
+    servicos = (
+        Servico.query
+        .order_by(Servico.nome)
+        .all()
+    )
+
+    if request.method == "POST":
+
+        servico_id = request.form.get("servico_id")
+        data_bloqueio = request.form.get("data")
+        motivo = request.form.get("motivo", "").strip()
+
+        if not servico_id:
+            flash(
+                "Selecione um serviço.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.bloqueios")
+            )
+
+        if not data_bloqueio:
+            flash(
+                "Informe a data do bloqueio.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.bloqueios")
+            )
+
+        try:
+            servico_id = int(servico_id)
+
+            data_bloqueio = date.fromisoformat(
+                data_bloqueio
+            )
+
+        except (ValueError, TypeError):
+            flash(
+                "Data ou serviço inválido.",
+                "danger"
+            )
+            return redirect(
+                url_for("admin.bloqueios")
+            )
+
+        servico = Servico.query.get_or_404(
+            servico_id
+        )
+
+        bloqueio_existente = (
+            BloqueioData.query
+            .filter_by(
+                servico_id=servico.id,
+                data=data_bloqueio
+            )
+            .first()
+        )
+
+        if bloqueio_existente:
+            flash(
+                "Já existe um bloqueio para este serviço nesta data.",
+                "warning"
+            )
+            return redirect(
+                url_for("admin.bloqueios")
+            )
+
+        bloqueio = BloqueioData(
+            servico_id=servico.id,
+            data=data_bloqueio,
+            motivo=motivo or None,
+            ativo=True
+        )
+
+        db.session.add(bloqueio)
+        db.session.commit()
+
+        flash(
+            "Data bloqueada com sucesso.",
+            "success"
+        )
+
+        return redirect(
+            url_for("admin.bloqueios")
+        )
+
+    bloqueios = (
+        BloqueioData.query
+        .order_by(
+            BloqueioData.data.desc()
+        )
+        .all()
+    )
+
+    return render_template(
+        "admin/bloqueios.html",
+        servicos=servicos,
+        bloqueios=bloqueios
+    )        
+
+@admin_bp.route(
+    "/bloqueios/<int:bloqueio_id>/status",
+    methods=["POST"]
+)
+@login_required
+def alterar_status_bloqueio(bloqueio_id):
+
+    bloqueio = BloqueioData.query.get_or_404(
+        bloqueio_id
+    )
+
+    bloqueio.ativo = not bloqueio.ativo
+
+    db.session.commit()
+
+    if bloqueio.ativo:
+        flash(
+            "Bloqueio ativado com sucesso.",
+            "success"
+        )
+    else:
+        flash(
+            "Bloqueio desativado com sucesso.",
+            "success"
+        )
+
+    return redirect(
+        url_for("admin.bloqueios")
+    )

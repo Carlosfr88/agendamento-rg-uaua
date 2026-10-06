@@ -15,8 +15,11 @@ from ..extensions import db
 from ..models import (
     Servico,
     HorarioDisponivel,
+    AgendaDiaria,
     Agendamento,
-    Informacao
+    Informacao,
+    DiaAtendimento,
+    BloqueioData
 )
 
 
@@ -129,27 +132,42 @@ def formatar_telefone(telefone):
     return telefone
 
 # ============================================================
-# FUNÇÃO AUXILIAR - VAGAS
+# FUNÇÃO AUXILIAR - VAGAS DA AGENDA DIÁRIA
 # ============================================================
 
-def calcular_vagas(horario):
+def calcular_vagas_agenda(agenda):
     """
-    Calcula a quantidade de vagas restantes.
+    Calcula as vagas restantes de uma agenda diária.
 
-    Todos os agendamentos ocupam vaga, exceto os cancelados.
+    Todos os agendamentos ocupam uma vaga,
+    exceto os cancelados.
     """
 
-    ocupadas = Agendamento.query.filter(
-        Agendamento.servico_id == horario.servico_id,
-        Agendamento.data == horario.data,
-        Agendamento.horario == horario.hora,
-        Agendamento.status != "cancelado"
-    ).count()
+    ocupadas = (
+        Agendamento.query
+        .filter(
+            Agendamento.servico_id == agenda.servico_id,
+            Agendamento.data == agenda.data,
+            Agendamento.status != "cancelado"
+        )
+        .count()
+    )
 
-    vagas = horario.capacidade - ocupadas
+    vagas = agenda.capacidade - ocupadas
 
     return max(vagas, 0)
 
+def data_bloqueada(servico_id, data):
+    return (
+        BloqueioData.query
+        .filter_by(
+            servico_id=servico_id,
+            data=data,
+            ativo=True
+        )
+        .first()
+        is not None
+    )    
 
 # ============================================================
 # PÁGINA INICIAL
@@ -259,6 +277,16 @@ def agendamento_data(servico_id):
             numero
         )
 
+        dia_atendimento = (
+            DiaAtendimento.query
+            .filter_by(
+                servico_id=servico.id,
+                dia_semana=data_atual.weekday(),
+                ativo=True
+            )
+            .first()
+        )
+
         fim_de_semana = (
             data_atual.weekday() >= 5
         )
@@ -267,32 +295,37 @@ def agendamento_data(servico_id):
             data_atual < hoje
         )
 
-        horarios = (
-            HorarioDisponivel.query
+        agenda = (
+            AgendaDiaria.query
             .filter_by(
                 servico_id=servico.id,
                 data=data_atual,
                 ativo=True
             )
-            .order_by(
-                HorarioDisponivel.hora.asc()
-            )
-            .all()
+            .first()
         )
 
         vagas_disponiveis = 0
 
-        for horario in horarios:
+        if agenda:
 
-            vagas = calcular_vagas(
-                horario
+            vagas_disponiveis = (
+                calcular_vagas_agenda(
+                    agenda
+                )
             )
 
-            vagas_disponiveis += vagas
+        bloqueada = data_bloqueada(
+            servico.id,
+            data_atual
+        )    
 
         disponivel = (
-            not fim_de_semana
+            dia_atendimento is not None
+            and not fim_de_semana
             and not passado
+            and not bloqueada
+            and agenda is not None
             and vagas_disponiveis > 0
         )
 
@@ -319,7 +352,7 @@ def agendamento_data(servico_id):
 
 
 # ============================================================
-# AGENDAMENTO - HORÁRIOS
+# AGENDAMENTO - AGENDA DO DIA
 # ============================================================
 
 @public_bp.route(
@@ -346,50 +379,118 @@ def agendamento_horarios(
             data
         )
 
+        if data_bloqueada(
+            servico.id,
+            data_agendamento
+        ):
+            flash(
+                "Esta data está bloqueada para este serviço.",
+                "warning"
+            )
+            return redirect(
+                url_for(
+                    "public.agendamento_data",
+                    servico_id=servico.id
+                )
+            )
+
+        dia_atendimento = (
+            DiaAtendimento.query
+            .filter_by(
+                servico_id=servico.id,
+                dia_semana=data_agendamento.weekday(),
+                ativo=True
+            )
+            .first()
+        )
+
+        if dia_atendimento is None:
+            flash(
+                "Não há atendimento disponível para este serviço nesta data.",
+                "warning"
+            )
+            return redirect(
+                url_for(
+                    "public.agendamento_data",
+                    servico_id=servico.id
+                )
+            )   
+
     except ValueError:
 
         return "Data inválida", 400
 
-    horarios = (
-        HorarioDisponivel.query
+        # ========================================================
+    # BLOQUEIA FINAIS DE SEMANA
+    # ========================================================
+
+    if data_agendamento.weekday() >= 5:
+
+        flash(
+            "Não há atendimento aos sábados e domingos.",
+            "warning"
+        )
+
+        return redirect(
+            url_for(
+                "public.agendamento_data",
+                servico_id=servico.id
+            )
+        )    
+
+    # ========================================================
+    # LOCALIZA A AGENDA DO DIA
+    # ========================================================
+
+    agenda = (
+        AgendaDiaria.query
         .filter_by(
             servico_id=servico.id,
             data=data_agendamento,
             ativo=True
         )
-        .order_by(
-            HorarioDisponivel.hora.asc()
-        )
-        .all()
+        .first()
     )
 
-    horarios_disponiveis = []
+    if not agenda:
 
-    for horario in horarios:
-
-        vagas_restantes = calcular_vagas(
-            horario
+        return render_template(
+            "public/agendamento_horarios.html",
+            servico=servico,
+            data=data_agendamento,
+            agenda=None,
+            vagas=0
         )
 
-        ocupadas = (
-            horario.capacidade
-            - vagas_restantes
-        )
+    # ========================================================
+    # CALCULA VAGAS
+    # ========================================================
 
-        horarios_disponiveis.append({
-            "id": horario.id,
-            "hora": horario.hora,
-            "capacidade": horario.capacidade,
-            "ocupadas": ocupadas,
-            "vagas": vagas_restantes,
-            "disponivel": vagas_restantes > 0
-        })
+    vagas = calcular_vagas_agenda(
+        agenda
+    )
+
+    ocupadas = (
+        agenda.capacidade
+        - vagas
+    )
+
+    disponivel = (
+        vagas > 0
+    )
+
+    # ========================================================
+    # EXIBE AGENDA DO DIA
+    # ========================================================
 
     return render_template(
         "public/agendamento_horarios.html",
         servico=servico,
         data=data_agendamento,
-        horarios=horarios_disponiveis
+        agenda=agenda,
+        vagas=vagas,
+        ocupadas=ocupadas,
+        disponivel=disponivel
     )
 
 # ============================================================
@@ -397,13 +498,13 @@ def agendamento_horarios(
 # ============================================================
 
 @public_bp.route(
-    "/agendamento/<int:servico_id>/data/<string:data>/horario/<int:horario_id>",
+    "/agendamento/<int:servico_id>/data/<string:data>/agenda/<int:agenda_id>",
     methods=["GET", "POST"]
 )
 def agendamento_formulario(
     servico_id,
     data,
-    horario_id
+    agenda_id
 ):
 
     # Somente serviços ativos podem receber novos agendamentos
@@ -422,20 +523,108 @@ def agendamento_formulario(
             data
         )
 
+        if data_bloqueada(
+            servico.id,
+            data_agendamento
+        ):
+            flash(
+                "Esta data está bloqueada para este serviço.",
+                "warning"
+            )
+            return redirect(
+                url_for(
+                    "public.agendamento_data",
+                    servico_id=servico.id
+                )
+            )
+
+        dia_atendimento = (
+            DiaAtendimento.query
+            .filter_by(
+                servico_id=servico.id,
+                dia_semana=data_agendamento.weekday(),
+                ativo=True
+            )
+            .first()
+        )
+
+        if dia_atendimento is None:
+            flash(
+                "Não há atendimento disponível para este serviço nesta data.",
+                "warning"
+            )
+            return redirect(
+                url_for(
+                    "public.agendamento_data",
+                    servico_id=servico.id
+                )
+            )
+
     except ValueError:
 
         return "Data inválida", 400
 
-    horario = (
-        HorarioDisponivel.query
+        # ========================================================
+    # BLOQUEIA FINAIS DE SEMANA
+    # ========================================================
+
+    if data_agendamento.weekday() >= 5:
+
+        flash(
+            "Não há atendimento aos sábados e domingos.",
+            "warning"
+        )
+
+        return redirect(
+            url_for(
+                "public.agendamento_data",
+                servico_id=servico.id
+            )
+        )    
+
+    # ========================================================
+    # LOCALIZA A AGENDA
+    # ========================================================
+
+    agenda = (
+        AgendaDiaria.query
         .filter_by(
-            id=horario_id,
+            id=agenda_id,
             servico_id=servico.id,
             data=data_agendamento,
             ativo=True
         )
         .first_or_404()
     )
+
+    # ========================================================
+    # FUNÇÃO AUXILIAR PARA RENDERIZAR O FORMULÁRIO
+    # ========================================================
+
+    def exibir_formulario(
+        nome="",
+        cpf="",
+        telefone="",
+        endereco="",
+        classificacao="normal"
+    ):
+
+        vagas_restantes = calcular_vagas_agenda(
+            agenda
+        )
+
+        return render_template(
+            "public/agendamento_formulario.html",
+            servico=servico,
+            data=data_agendamento,
+            agenda=agenda,
+            nome=nome,
+            cpf=cpf,
+            telefone=telefone,
+            endereco=endereco,
+            classificacao=classificacao,
+            vagas_restantes=vagas_restantes
+        )
 
     # ========================================================
     # PROCESSAMENTO DO AGENDAMENTO
@@ -458,6 +647,37 @@ def agendamento_formulario(
             ""
         ).strip()
 
+        endereco = request.form.get(
+            "endereco",
+            ""
+        ).strip()
+
+        classificacao = request.form.get(
+            "classificacao",
+            "normal"
+        ).strip().lower()
+
+        sem_telefone = (
+            request.form.get(
+                "sem_telefone"
+            ) == "1"
+        )
+
+        if sem_telefone:
+
+            telefone = ""
+
+        classificacoes_validas = {
+            "normal",
+            "idoso",
+            "pcd",
+            "gestante"
+        }
+
+        if classificacao not in classificacoes_validas:
+
+            classificacao = "normal"
+
         # ----------------------------------------------------
         # VALIDA NOME
         # ----------------------------------------------------
@@ -469,15 +689,12 @@ def agendamento_formulario(
                 "danger"
             )
 
-            return render_template(
-                "public/agendamento_formulario.html",
-                servico=servico,
-                data=data_agendamento,
-                horario=horario,
+            return exibir_formulario(
                 nome=nome,
                 cpf=cpf,
                 telefone=telefone,
-                vagas_restantes=calcular_vagas(horario)
+                endereco=endereco,
+                classificacao=classificacao
             )
 
         # ----------------------------------------------------
@@ -491,15 +708,12 @@ def agendamento_formulario(
                 "danger"
             )
 
-            return render_template(
-                "public/agendamento_formulario.html",
-                servico=servico,
-                data=data_agendamento,
-                horario=horario,
+            return exibir_formulario(
                 nome=nome,
                 cpf=cpf,
                 telefone=telefone,
-                vagas_restantes=calcular_vagas(horario)
+                endereco=endereco,
+                classificacao=classificacao
             )
 
         # ----------------------------------------------------
@@ -513,15 +727,12 @@ def agendamento_formulario(
                 "danger"
             )
 
-            return render_template(
-                "public/agendamento_formulario.html",
-                servico=servico,
-                data=data_agendamento,
-                horario=horario,
+            return exibir_formulario(
                 nome=nome,
                 cpf=cpf,
                 telefone=telefone,
-                vagas_restantes=calcular_vagas(horario)
+                endereco=endereco,
+                classificacao=classificacao
             )
 
         # ----------------------------------------------------
@@ -535,15 +746,12 @@ def agendamento_formulario(
                 "danger"
             )
 
-            return render_template(
-                "public/agendamento_formulario.html",
-                servico=servico,
-                data=data_agendamento,
-                horario=horario,
+            return exibir_formulario(
                 nome=nome,
                 cpf=cpf,
                 telefone=telefone,
-                vagas_restantes=calcular_vagas(horario)
+                endereco=endereco,
+                classificacao=classificacao
             )
 
         # ----------------------------------------------------
@@ -562,7 +770,7 @@ def agendamento_formulario(
 
             telefone = None
 
-                # ----------------------------------------------------
+        # ----------------------------------------------------
         # VERIFICA AGENDAMENTO DUPLICADO
         # ----------------------------------------------------
 
@@ -570,9 +778,10 @@ def agendamento_formulario(
             Agendamento.query
             .filter(
                 Agendamento.cpf == cpf,
-                Agendamento.servico_id == servico.id,
-                Agendamento.data == data_agendamento,
-                Agendamento.status != "cancelado"
+                Agendamento.status.in_([
+                    "agendado",
+                    "nao_compareceu"
+                ])
             )
             .first()
         )
@@ -580,36 +789,45 @@ def agendamento_formulario(
         if agendamento_existente:
 
             flash(
-                "Já existe um agendamento para este CPF "
-                "neste serviço e nesta data.",
+                "Já existe um agendamento ativo para este CPF. "
+                "Não é possível realizar outro agendamento "
+                "enquanto o atendimento anterior estiver ativo.",
                 "warning"
             )
 
-            return render_template(
-                "public/agendamento_formulario.html",
-                servico=servico,
-                data=data_agendamento,
-                horario=horario,
+            return exibir_formulario(
                 nome=nome,
                 cpf=cpf,
                 telefone=telefone or "",
-                vagas_restantes=calcular_vagas(horario)
-            )    
+                endereco=endereco,
+                classificacao=classificacao
+            )
 
         # ----------------------------------------------------
-        # VERIFICA NOVAMENTE A CAPACIDADE
+        # VERIFICA CAPACIDADE
         # ----------------------------------------------------
 
-        vagas_restantes = calcular_vagas(
-            horario
+        vagas_restantes = calcular_vagas_agenda(
+            agenda
         )
 
         if vagas_restantes <= 0:
 
-            return (
-                "Este horário acabou de ficar sem vagas. "
-                "Escolha outro horário."
-            ), 409
+            flash(
+                "Este dia acabou de ficar sem vagas. "
+                "Escolha outra data.",
+                "warning"
+            )
+
+            return redirect(
+                url_for(
+                    "public.agendamento_horarios",
+                    servico_id=servico.id,
+                    data=data_agendamento.strftime(
+                        "%Y-%m-%d"
+                    )
+                )
+            )
 
         # ----------------------------------------------------
         # GERA PROTOCOLO ÚNICO
@@ -636,29 +854,30 @@ def agendamento_formulario(
 
                 break
 
-            # ----------------------------------------------------
+        # ----------------------------------------------------
         # VERIFICA NOVAMENTE A DISPONIBILIDADE
-        # IMEDIATAMENTE ANTES DE CRIAR O AGENDAMENTO
+        # IMEDIATAMENTE ANTES DE CRIAR
         # ----------------------------------------------------
 
-        vagas_disponiveis = calcular_vagas(
-            horario
+        vagas_disponiveis = calcular_vagas_agenda(
+            agenda
         )
 
         if vagas_disponiveis <= 0:
 
             flash(
-                "Este horário acabou de ficar sem vagas. "
-                "Escolha outro horário.",
+                "Este dia acabou de ficar sem vagas. "
+                "Escolha outra data.",
                 "warning"
             )
 
             return redirect(
                 url_for(
-                    "public.agendamento_formulario",
+                    "public.agendamento_horarios",
                     servico_id=servico.id,
-                    data=data_agendamento.strftime("%Y-%m-%d"),
-                    horario_id=horario.id
+                    data=data_agendamento.strftime(
+                        "%Y-%m-%d"
+                    )
                 )
             )
 
@@ -670,10 +889,16 @@ def agendamento_formulario(
             protocolo=protocolo,
             servico_id=servico.id,
             data=data_agendamento,
-            horario=horario.hora,
+
+            # Mantemos o horário de início da agenda
+            # para compatibilidade com o banco existente.
+            horario=agenda.hora_inicio,
+
             nome=nome,
             cpf=cpf,
             telefone=telefone,
+            endereco=endereco or None,
+            classificacao=classificacao,
             status="agendado"
         )
 
@@ -686,29 +911,23 @@ def agendamento_formulario(
         return render_template(
             "public/agendamento_sucesso.html",
             agendamento=novo_agendamento
-        )    
+        )
 
     # ========================================================
     # VERIFICA DISPONIBILIDADE PARA EXIBIÇÃO
     # ========================================================
 
-    vagas_restantes = calcular_vagas(
-        horario
+    vagas_restantes = calcular_vagas_agenda(
+        agenda
     )
 
     if vagas_restantes <= 0:
 
         return (
-            "Este horário não possui mais vagas."
+            "Este dia não possui mais vagas."
         ), 409
 
-    return render_template(
-        "public/agendamento_formulario.html",
-        servico=servico,
-        data=data_agendamento,
-        horario=horario,
-        vagas_restantes=vagas_restantes
-    )
+    return exibir_formulario()
 
 @public_bp.route("/informacoes")
 def informacoes():
@@ -727,7 +946,7 @@ def informacoes():
         "public/informacoes.html",
         informacoes=informacoes
     )
-    
+
 # ============================================================
 # CONSULTAR AGENDAMENTO
 # ============================================================

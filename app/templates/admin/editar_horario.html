@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Editar horário - Agendamento RG{% endblock %}
+{% block title %}Editar agenda diária - Agendamento RG{% endblock %}
 
 {% block content %}
 
@@ -9,11 +9,19 @@
     <div class="page-header">
 
         <div>
-            <h1>Editar horário</h1>
+
+            <span class="page-eyebrow">
+                ADMINISTRAÇÃO
+            </span>
+
+            <h1>
+                Editar agenda diária
+            </h1>
 
             <p>
-                Altere os dados do horário disponível.
+                Altere a data, janela de atendimento e capacidade desta agenda.
             </p>
+
         </div>
 
         <a
@@ -35,27 +43,28 @@
                 name="csrf_token"
                 value="{{ csrf_token() }}"
             >
-        
+
+
             <div class="form-grid">
-        
+
                 <div class="form-group full">
-        
+
                     <label for="servico_id">
                         Serviço
                     </label>
-        
+
                     <select
                         id="servico_id"
                         name="servico_id"
                         required
                     >
-        
+
                         <option value="">
                             Selecione um serviço
                         </option>
-        
+
                         {% for servico in servicos %}
-        
+
                             <option
                                 value="{{ servico.id }}"
                                 {% if servico.id == horario.servico_id %}
@@ -64,11 +73,11 @@
                             >
                                 {{ servico.nome }}
                             </option>
-        
+
                         {% endfor %}
-        
+
                     </select>
-        
+
                 </div>
 
 
@@ -86,22 +95,9 @@
                         required
                     >
 
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="hora">
-                        Horário
-                    </label>
-
-                    <input
-                        type="time"
-                        id="hora"
-                        name="hora"
-                        value="{{ horario.hora.strftime('%H:%M') }}"
-                        required
-                    >
+                    <span class="field-help">
+                        Data em que o atendimento estará disponível.
+                    </span>
 
                 </div>
 
@@ -109,21 +105,98 @@
                 <div class="form-group">
 
                     <label for="capacidade">
-                        Capacidade
+                        Capacidade diária
                     </label>
 
                     <input
                         type="number"
                         id="capacidade"
                         name="capacidade"
-                        min="1"
+                        min="{{ horario.ocupadas if horario.ocupadas is defined else 1 }}"
                         value="{{ horario.capacidade }}"
                         required
                     >
 
                     <span class="field-help">
-                        Quantidade máxima de pessoas permitidas neste horário.
+                        Quantidade máxima de pessoas permitidas nesta data.
                     </span>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="hora_inicio">
+                        Início do atendimento
+                    </label>
+
+                    <input
+                        type="time"
+                        id="hora_inicio"
+                        name="hora_inicio"
+                        value="{{ horario.hora_inicio.strftime('%H:%M') }}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="hora_fim">
+                        Encerramento do atendimento
+                    </label>
+
+                    <input
+                        type="time"
+                        id="hora_fim"
+                        name="hora_fim"
+                        value="{{ horario.hora_fim.strftime('%H:%M') }}"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="current-info">
+
+                <div class="current-info-item">
+
+                    <span>
+                        Ocupadas
+                    </span>
+
+                    <strong>
+                        {{ horario.ocupadas if horario.ocupadas is defined else 0 }}
+                    </strong>
+
+                </div>
+
+
+                <div class="current-info-item">
+
+                    <span>
+                        Disponíveis
+                    </span>
+
+                    <strong class="{% if horario.disponiveis is defined and horario.disponiveis == 0 %}zero{% endif %}">
+                        {{ horario.disponiveis if horario.disponiveis is defined else horario.capacidade }}
+                    </strong>
+
+                </div>
+
+
+                <div class="current-info-item">
+
+                    <span>
+                        Capacidade atual
+                    </span>
+
+                    <strong>
+                        {{ horario.capacidade }}
+                    </strong>
 
                 </div>
 
@@ -143,8 +216,10 @@
                     </strong>
 
                     <p>
-                        Alterações de data, horário ou capacidade podem afetar
-                        a disponibilidade para novos agendamentos.
+                        A capacidade não poderá ser reduzida para um valor
+                        inferior à quantidade de pessoas já agendadas.
+                        A nova janela de atendimento deve possuir horário
+                        inicial menor que o horário final.
                     </p>
 
                 </div>
@@ -193,15 +268,24 @@
     margin-bottom: 25px;
 }
 
+.page-eyebrow {
+    display: block;
+    margin-bottom: 6px;
+    color: #1f7a8c;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+
 .page-header h1 {
     margin: 0 0 6px;
-    color: #1f2937;
+    color: #17212b;
     font-size: 28px;
 }
 
 .page-header p {
     margin: 0;
-    color: #6b7280;
+    color: #65717d;
     font-size: 14px;
 }
 
@@ -227,7 +311,7 @@
 
 .form-card {
     background: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e1e6eb;
     border-radius: 14px;
     padding: 30px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
@@ -276,8 +360,8 @@
 
 .form-group input:focus,
 .form-group select:focus {
-    border-color: #6b7280;
-    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.12);
+    border-color: #1f7a8c;
+    box-shadow: 0 0 0 3px rgba(31, 122, 140, 0.12);
 }
 
 .field-help {
@@ -287,11 +371,44 @@
     line-height: 1.5;
 }
 
+.current-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.current-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.current-info-item span {
+    color: #65717d;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.current-info-item strong {
+    color: #123b5d;
+    font-size: 20px;
+}
+
+.current-info-item strong.zero {
+    color: #b91c1c;
+}
+
 .info-box {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    margin-top: 28px;
+    margin-top: 25px;
     padding: 15px;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -359,13 +476,13 @@
 }
 
 .submit-button {
-    border: 1px solid #1f2937;
-    background: #1f2937;
+    border: 1px solid #123b5d;
+    background: #123b5d;
     color: #ffffff;
 }
 
 .submit-button:hover {
-    background: #111827;
+    background: #0b2941;
 }
 
 @media (max-width: 700px) {
@@ -394,6 +511,10 @@
 
     .form-group.full {
         grid-column: auto;
+    }
+
+    .current-info {
+        grid-template-columns: 1fr;
     }
 
     .form-actions {

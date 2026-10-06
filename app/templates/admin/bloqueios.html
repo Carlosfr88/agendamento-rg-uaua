@@ -1,0 +1,529 @@
+{% extends "base.html" %}
+
+{% block title %}Bloqueios de datas - Painel Administrativo{% endblock %}
+
+{% block content %}
+
+<div class="admin-page">
+
+    <header class="admin-header">
+
+        <div>
+            <h1>Bloqueios de datas</h1>
+            <p>
+                Bloqueie datas específicas para impedir novos agendamentos.
+            </p>
+        </div>
+
+        <div class="header-actions">
+
+            <a
+                href="{{ url_for('admin.dashboard') }}"
+                class="button-secondary"
+            >
+                Voltar
+            </a>
+
+        </div>
+
+    </header>
+
+    <section class="content-card">
+
+        <div class="card-header">
+
+            <div>
+                <h2>Novo bloqueio</h2>
+                <p>
+                    O bloqueio será aplicado somente ao serviço selecionado.
+                </p>
+            </div>
+
+        </div>
+
+        <form
+            method="POST"
+            class="block-form"
+        >
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label for="servico_id">
+                        Serviço
+                    </label>
+
+                    <select
+                        id="servico_id"
+                        name="servico_id"
+                        required
+                    >
+
+                        <option value="">
+                            Selecione o serviço
+                        </option>
+
+                        {% for servico in servicos %}
+
+                        <option value="{{ servico.id }}">
+                            {{ servico.nome }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="data">
+                        Data
+                    </label>
+
+                    <input
+                        type="date"
+                        id="data"
+                        name="data"
+                        required
+                    >
+
+                </div>
+
+                <div class="form-group form-group-full">
+
+                    <label for="motivo">
+                        Motivo
+                    </label>
+
+                    <input
+                        type="text"
+                        id="motivo"
+                        name="motivo"
+                        maxlength="255"
+                        placeholder="Ex.: Feriado, ponto facultativo, manutenção..."
+                    >
+
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+
+                <button
+                    type="submit"
+                    class="button-primary"
+                >
+                    Bloquear data
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <section class="content-card blocks-card">
+
+        <div class="card-header">
+
+            <div>
+                <h2>Datas bloqueadas</h2>
+                <p>
+                    Histórico das datas configuradas como indisponíveis.
+                </p>
+            </div>
+
+            <div class="total-badge">
+                {{ bloqueios|length }} bloqueio(s)
+            </div>
+
+        </div>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Serviço</th>
+                        <th>Data</th>
+                        <th>Motivo</th>
+                        <th>Status</th>
+                        <th>Ação</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for bloqueio in bloqueios %}
+
+                    
+                    <tr>
+
+                        <td>
+                            <strong>
+                                {{ bloqueio.servico.nome }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ bloqueio.data.strftime('%d/%m/%Y') }}
+                        </td>
+
+                        <td>
+                            {% if bloqueio.motivo %}
+                                {{ bloqueio.motivo }}
+                            {% else %}
+                                <span class="text-muted">
+                                    Sem motivo informado
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+
+                            {% if bloqueio.ativo %}
+
+                                <span class="status status-inativo">
+                                    Bloqueado
+                                </span>
+
+                            {% else %}
+
+                                <span class="status status-ativo">
+                                    Inativo
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <form
+                                method="POST"
+                                action="{{
+                                    url_for(
+                                        'admin.alterar_status_bloqueio',
+                                        bloqueio_id=bloqueio.id
+                                    )
+                                }}"
+                            >
+                        
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token() }}"
+                                >
+                        
+                                <button
+                                    type="submit"
+                                    class="button-secondary"
+                                >
+                                    {% if bloqueio.ativo %}
+                                        Desativar
+                                    {% else %}
+                                        Ativar
+                                    {% endif %}
+                                </button>
+                        
+                            </form>
+                        
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            class="empty"
+                        >
+                            Nenhuma data bloqueada.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<style>
+
+.admin-page {
+    min-height: calc(100vh - 70px);
+    padding: 35px;
+    background: #f5f7fa;
+}
+
+.admin-header {
+    max-width: 1200px;
+    margin: 0 auto 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.admin-header h1 {
+    margin: 0 0 6px;
+    color: #17212b;
+    font-size: 28px;
+}
+
+.admin-header p {
+    margin: 0;
+    color: #65717d;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.content-card {
+    max-width: 1200px;
+    margin: 0 auto 25px;
+    background: #ffffff;
+    border: 1px solid #e1e6eb;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 25px 28px;
+    border-bottom: 1px solid #e1e6eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.card-header h2 {
+    margin: 0 0 5px;
+    color: #17212b;
+    font-size: 20px;
+}
+
+.card-header p {
+    margin: 0;
+    color: #65717d;
+}
+
+.total-badge {
+    padding: 7px 12px;
+    border-radius: 20px;
+    background: #f0f4f7;
+    color: #123b5d;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.block-form {
+    padding: 28px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group-full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #17212b;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #d5dce2;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #17212b;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #1f7a8c;
+    box-shadow: 0 0 0 3px rgba(31, 122, 140, 0.10);
+}
+
+.form-actions {
+    margin-top: 25px;
+    padding-top: 22px;
+    border-top: 1px solid #e1e6eb;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.button-primary,
+.button-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.button-primary {
+    background: #123b5d;
+    color: #ffffff;
+}
+
+.button-primary:hover {
+    background: #0b2941;
+}
+
+.button-secondary {
+    background: #ffffff;
+    color: #123b5d;
+    border: 1px solid #d5dce2;
+}
+
+.button-secondary:hover {
+    background: #f5f7fa;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid #e1e6eb;
+}
+
+th {
+    background: #f8fafb;
+    color: #65717d;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+td {
+    color: #17212b;
+    font-size: 14px;
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-inativo {
+    background: #fff1f1;
+    color: #a33a3a;
+}
+
+.status-ativo {
+    background: #edf8f1;
+    color: #2f7d4a;
+}
+
+.text-muted {
+    color: #65717d;
+}
+
+.empty {
+    padding: 35px;
+    text-align: center;
+    color: #65717d;
+}
+
+.blocks-card {
+    margin-bottom: 0;
+}
+
+@media (max-width: 700px) {
+
+    .admin-page {
+        padding: 20px 15px;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group-full {
+        grid-column: auto;
+    }
+
+    .form-actions {
+        justify-content: stretch;
+    }
+
+    .button-primary {
+        width: 100%;
+    }
+
+    .card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+}
+
+</style>
+
+{% endblock %}

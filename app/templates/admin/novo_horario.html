@@ -1,186 +1,209 @@
 {% extends "base.html" %}
 
-{% block title %}Novo horário - Agendamento RG{% endblock %}
+{% block title %}Nova agenda diária - Agendamento RG{% endblock %}
 
 {% block content %}
 
 <section class="novo-horario-page">
 
-    <div class="page-header">
+```
+<div class="page-header">
 
-        <div>
-            <h1>Novo horário</h1>
+    <div>
+        <h1>Nova agenda diária</h1>
 
-            <p>
-                Cadastre uma data e um horário disponível para agendamento.
-            </p>
+        <p>
+            Cadastre uma data e a janela de atendimento disponível para agendamento.
+        </p>
+    </div>
+
+    <a
+        href="{{ url_for('admin.horarios') }}"
+        class="back-button"
+    >
+        Voltar
+    </a>
+
+</div>
+
+
+<div class="form-card">
+
+    <form method="post">
+
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token() }}"
+        >
+
+        <div class="form-grid">
+
+            <div class="form-group full">
+
+                <label for="servico_id">
+                    Serviço
+                </label>
+
+                <select
+                    id="servico_id"
+                    name="servico_id"
+                    required
+                >
+
+                    <option value="">
+                        Selecione um serviço
+                    </option>
+
+                    {% for servico in servicos %}
+
+                    <option
+                        value="{{ servico.id }}"
+                        {% if request.form.get('servico_id')|int == servico.id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ servico.nome }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <span class="field-help">
+                    Selecione o serviço que terá atendimento nesta data.
+                </span>
+
+            </div>
+
+
+            <div class="form-group">
+                <label for="data">Data</label>
+            
+                <input
+                    type="date"
+                    id="data"
+                    name="data"
+                    value="{{ request.form.get('data', '') }}"
+                    min="{{ hoje.strftime('%Y-%m-%d') }}"
+                    required
+                >
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="capacidade">
+                    Capacidade diária
+                </label>
+
+                <input
+                    type="number"
+                    id="capacidade"
+                    name="capacidade"
+                    min="1"
+                    value="{{ request.form.get('capacidade', '30') }}"
+                    required
+                >
+
+                <span class="field-help">
+                    Quantidade máxima de agendamentos permitidos nesta data.
+                </span>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="hora_inicio">
+                    Horário inicial
+                </label>
+
+                <input
+                    type="time"
+                    id="hora_inicio"
+                    name="hora_inicio"
+                    value="{{ request.form.get('hora_inicio', '08:00') }}"
+                    required
+                >
+
+                <span class="field-help">
+                    Início do atendimento.
+                </span>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="hora_fim">
+                    Horário final
+                </label>
+
+                <input
+                    type="time"
+                    id="hora_fim"
+                    name="hora_fim"
+                    value="{{ request.form.get('hora_fim', '14:00') }}"
+                    required
+                >
+
+                <span class="field-help">
+                    Encerramento do atendimento.
+                </span>
+
+            </div>
+
         </div>
 
-        <a
-            href="{{ url_for('admin.horarios') }}"
-            class="back-button"
-        >
-            Voltar
-        </a>
 
-    </div>
+        <div class="info-box">
 
+            <div class="info-icon">
+                i
+            </div>
 
-    <div class="form-card">
+            <div>
 
-        <form method="post">
+                <strong>
+                    Sobre a agenda diária
+                </strong>
 
-            <div class="form-grid">
-
-                <div class="form-group full">
-
-                    <label for="servico_id">
-                        Serviço
-                    </label>
-
-                    <input
-                        type="hidden"
-                        name="csrf_token"
-                        value="{{ csrf_token() }}"
-                    >
-
-                    <select
-                        id="servico_id"
-                        name="servico_id"
-                        required
-                    >
-
-                        <option value="">
-                            Selecione um serviço
-                        </option>
-
-                        {% for servico in servicos %}
-
-                        <option
-                            value="{{ servico.id }}"
-                            {% if request.form.get('servico_id')|int == servico.id %}
-                                selected
-                            {% endif %}
-                        >
-                            {{ servico.nome }}
-                        </option>
-
-                        {% endfor %}
-
-                    </select>
-
-                    <span class="field-help">
-                        Selecione o serviço ao qual este horário estará vinculado.
-                    </span>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="data">
-                        Data
-                    </label>
-
-                    <input
-                        type="date"
-                        id="data"
-                        name="data"
-                        value="{{ request.form.get('data', '') }}"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="hora">
-                        Horário
-                    </label>
-
-                    <input
-                        type="time"
-                        id="hora"
-                        name="hora"
-                        value="{{ request.form.get('hora', '') }}"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="capacidade">
-                        Capacidade
-                    </label>
-
-                    <input
-                        type="number"
-                        id="capacidade"
-                        name="capacidade"
-                        min="1"
-                        value="{{ request.form.get('capacidade', '1') }}"
-                        required
-                    >
-
-                    <span class="field-help">
-                        Quantidade de pessoas que poderão utilizar este horário.
-                    </span>
-
-                </div>
+                <p>
+                    A agenda será criada como <strong>ativa</strong>.
+                    O atendimento ocorrerá dentro da janela informada e
+                    a capacidade será controlada automaticamente.
+                </p>
 
             </div>
 
-
-            <div class="info-box">
-
-                <div class="info-icon">
-                    i
-                </div>
-
-                <div>
-
-                    <strong>
-                        Sobre a disponibilidade
-                    </strong>
-
-                    <p>
-                        O horário será criado como <strong>ativo</strong>.
-                        Enquanto estiver ativo e houver vagas disponíveis,
-                        ele poderá ser utilizado no agendamento público.
-                    </p>
-
-                </div>
-
-            </div>
+        </div>
 
 
-            <div class="form-actions">
+        <div class="form-actions">
 
-                <a
-                    href="{{ url_for('admin.horarios') }}"
-                    class="cancel-button"
-                >
-                    Cancelar
-                </a>
+            <a
+                href="{{ url_for('admin.horarios') }}"
+                class="cancel-button"
+            >
+                Cancelar
+            </a>
 
-                <button
-                    type="submit"
-                    class="submit-button"
-                >
-                    Cadastrar horário
-                </button>
+            <button
+                type="submit"
+                class="submit-button"
+            >
+                Cadastrar agenda
+            </button>
 
-            </div>
+        </div>
 
-        </form>
+    </form>
 
-    </div>
+</div>
+```
 
 </section>
-
 
 <style>
 
