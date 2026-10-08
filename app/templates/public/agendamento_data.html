@@ -1,284 +1,349 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+{% extends "base.html" %}
 
-<head>
+{% block title %}
+    Escolher data - {{ servico.nome }}
+{% endblock %}
 
-    <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+{% block content %}
 
-    <title>
-        Escolher data - {{ servico.nome }}
-    </title>
+<style>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    .calendar-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-    <style>
+    .calendar-card {
+        background: #ffffff;
+        border: 1px solid #e1e6eb;
+        border-radius: 10px;
+        padding: 28px;
+    }
 
-        .calendar-wrapper {
-            max-width: 900px;
-            margin: 0 auto;
-        }
+    .calendar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .calendar-title {
+        text-align: center;
+        flex: 1;
+    }
+
+    .calendar-title h3 {
+        font-size: 24px;
+        margin: 0;
+        color: #17212b;
+    }
+
+    .calendar-title span {
+        display: block;
+        margin-top: 4px;
+        color: #65717d;
+        font-size: 14px;
+    }
+
+    .calendar-nav {
+        width: 42px;
+        height: 42px;
+        border: 1px solid #e1e6eb;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #123b5d;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .calendar-nav:hover {
+        background: #123b5d;
+        color: #ffffff;
+    }
+
+    .calendar-weekdays,
+    .calendar-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+    }
+
+    .calendar-weekdays {
+        margin-bottom: 8px;
+    }
+
+    .weekday {
+        text-align: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #65717d;
+        padding: 8px 0;
+    }
+
+    .calendar-day {
+        min-height: 72px;
+        border: 1px solid #e1e6eb;
+        border-radius: 7px;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        font-size: 16px;
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+
+    .calendar-day.empty {
+        border: none;
+        background: transparent;
+    }
+
+    .calendar-day.disabled {
+        background: #f1f3f5;
+        color: #a0a8b0;
+        cursor: not-allowed;
+    }
+
+    .calendar-day.available {
+        border-color: #1f7a8c;
+        color: #123b5d;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .calendar-day.available:hover {
+        background: #123b5d;
+        color: #ffffff;
+        border-color: #123b5d;
+    }
+
+    .calendar-day.today {
+        box-shadow: inset 0 0 0 2px #1f7a8c;
+    }
+
+    .day-number {
+        font-size: 18px;
+    }
+
+    .day-status {
+        font-size: 10px;
+        margin-top: 3px;
+        font-weight: 600;
+    }
+
+    .available .day-status {
+        color: #1f7a8c;
+    }
+
+    .available:hover .day-status {
+        color: #ffffff;
+    }
+
+    .day-vacancies {
+        font-size: 9px;
+        margin-top: 3px;
+        color: #65717d;
+        font-weight: 500;
+    }
+
+    .available:hover .day-vacancies {
+        color: #ffffff;
+    }
+
+    .calendar-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e1e6eb;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #65717d;
+        font-size: 13px;
+    }
+
+    .legend-box {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 1px solid #e1e6eb;
+    }
+
+    .legend-available {
+        border-color: #1f7a8c;
+    }
+
+    .legend-disabled {
+        background: #f1f3f5;
+    }
+
+    .legend-today {
+        box-shadow: inset 0 0 0 2px #1f7a8c;
+    }
+
+
+    /* CABEÇALHO DA ETAPA */
+
+    .calendar-page-header {
+        width: 100%;
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .calendar-page-header .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 18px 20px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .calendar-brand {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .calendar-brand-title {
+        color: #123b5d;
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .calendar-brand-subtitle {
+        color: #65717d;
+        font-size: 12px;
+        line-height: 1.3;
+    }
+
+    .calendar-back {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 9px 18px;
+
+        border-radius: 6px;
+
+        background: #123b5d;
+        color: #ffffff;
+
+        text-decoration: none;
+
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .calendar-back:hover {
+        background: #0b2941;
+    }
+
+
+    @media (max-width: 600px) {
 
         .calendar-card {
-            background: #ffffff;
-            border: 1px solid #e1e6eb;
-            border-radius: 10px;
-            padding: 28px;
-        }
-
-        .calendar-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .calendar-title {
-            text-align: center;
-            flex: 1;
-        }
-
-        .calendar-title h3 {
-            font-size: 24px;
-            margin: 0;
-            color: #17212b;
-        }
-
-        .calendar-title span {
-            display: block;
-            margin-top: 4px;
-            color: #65717d;
-            font-size: 14px;
-        }
-
-        .calendar-nav {
-            width: 42px;
-            height: 42px;
-            border: 1px solid #e1e6eb;
-            border-radius: 6px;
-            background: #ffffff;
-            color: #123b5d;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-        }
-
-        .calendar-nav:hover {
-            background: #123b5d;
-            color: #ffffff;
+            padding: 15px;
         }
 
         .calendar-weekdays,
         .calendar-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-        }
-
-        .calendar-weekdays {
-            margin-bottom: 8px;
-        }
-
-        .weekday {
-            text-align: center;
-            font-size: 12px;
-            font-weight: 700;
-            color: #65717d;
-            padding: 8px 0;
+            gap: 4px;
         }
 
         .calendar-day {
-            min-height: 72px;
-            border: 1px solid #e1e6eb;
-            border-radius: 7px;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            font-size: 16px;
-            text-decoration: none;
-            box-sizing: border-box;
-        }
-
-        .calendar-day.empty {
-            border: none;
-            background: transparent;
-        }
-
-        .calendar-day.disabled {
-            background: #f1f3f5;
-            color: #a0a8b0;
-            cursor: not-allowed;
-        }
-
-        .calendar-day.available {
-            border-color: #1f7a8c;
-            color: #123b5d;
-            cursor: pointer;
-            font-weight: 700;
-        }
-
-        .calendar-day.available:hover {
-            background: #123b5d;
-            color: #ffffff;
-            border-color: #123b5d;
-        }
-
-        .calendar-day.today {
-            box-shadow: inset 0 0 0 2px #1f7a8c;
+            min-height: 64px;
         }
 
         .day-number {
-            font-size: 18px;
+            font-size: 15px;
         }
 
         .day-status {
-            font-size: 10px;
-            margin-top: 3px;
-            font-weight: 600;
-        }
-
-        .available .day-status {
-            color: #1f7a8c;
-        }
-
-        .available:hover .day-status {
-            color: #ffffff;
+            font-size: 8px;
         }
 
         .day-vacancies {
-            font-size: 9px;
-            margin-top: 3px;
-            color: #65717d;
-            font-weight: 500;
+            font-size: 8px;
         }
 
-        .available:hover .day-vacancies {
-            color: #ffffff;
+        .weekday {
+            font-size: 10px;
         }
 
-        .calendar-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #e1e6eb;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
+        .calendar-header {
             gap: 8px;
-            color: #65717d;
-            font-size: 13px;
         }
 
-        .legend-box {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            border: 1px solid #e1e6eb;
+        .calendar-title h3 {
+            font-size: 19px;
         }
 
-        .legend-available {
-            border-color: #1f7a8c;
+        .calendar-page-header .container {
+            padding: 14px 15px;
         }
 
-        .legend-disabled {
-            background: #f1f3f5;
+        .calendar-brand-title {
+            font-size: 17px;
         }
 
-        .legend-today {
-            box-shadow: inset 0 0 0 2px #1f7a8c;
+        .calendar-brand-subtitle {
+            font-size: 10px;
         }
 
-        @media (max-width: 600px) {
-
-            .calendar-card {
-                padding: 15px;
-            }
-
-            .calendar-weekdays,
-            .calendar-days {
-                gap: 4px;
-            }
-
-            .calendar-day {
-                min-height: 64px;
-            }
-
-            .day-number {
-                font-size: 15px;
-            }
-
-            .day-status {
-                font-size: 8px;
-            }
-
-            .day-vacancies {
-                font-size: 8px;
-            }
-
-            .weekday {
-                font-size: 10px;
-            }
-
-            .calendar-header {
-                gap: 8px;
-            }
-
-            .calendar-title h3 {
-                font-size: 19px;
-            }
-
+        .calendar-back {
+            padding: 8px 12px;
+            font-size: 12px;
         }
 
-    </style>
+    }
 
-</head>
-
-
-<body>
+</style>
 
 
-<header class="topbar">
+<header class="calendar-page-header">
 
-    <div class="container topbar-content">
+    <div class="container">
 
-        <div class="brand">
+        <div class="calendar-brand">
 
-            <span class="brand-title">
+            <span class="calendar-brand-title">
                 SEDES
             </span>
 
-            <span class="brand-subtitle">
+            <span class="calendar-brand-subtitle">
                 Secretaria de Desenvolvimento Social e Combate à Pobreza
             </span>
 
         </div>
 
-        <a href="{{ url_for('public.agendamento') }}"
-           class="btn-login">
 
+        <a
+            href="{{ url_for('public.agendamento') }}"
+            class="calendar-back"
+        >
             Voltar
-
         </a>
 
     </div>
 
 </header>
 
-
-<main>
 
 <section class="services">
 
@@ -335,16 +400,16 @@
                     {% endif %}
 
 
-                    <a class="calendar-nav"
-                       href="{{ url_for(
-                           'public.agendamento_data',
-                           servico_id=servico.id,
-                           mes=mes_anterior,
-                           ano=ano_anterior
-                       ) }}">
-
+                    <a
+                        class="calendar-nav"
+                        href="{{ url_for(
+                            'public.agendamento_data',
+                            servico_id=servico.id,
+                            mes=mes_anterior,
+                            ano=ano_anterior
+                        ) }}"
+                    >
                         ‹
-
                     </a>
 
 
@@ -377,16 +442,16 @@
                     </div>
 
 
-                    <a class="calendar-nav"
-                       href="{{ url_for(
-                           'public.agendamento_data',
-                           servico_id=servico.id,
-                           mes=proximo_mes,
-                           ano=proximo_ano
-                       ) }}">
-
+                    <a
+                        class="calendar-nav"
+                        href="{{ url_for(
+                            'public.agendamento_data',
+                            servico_id=servico.id,
+                            mes=proximo_mes,
+                            ano=proximo_ano
+                        ) }}"
+                    >
                         ›
-
                     </a>
 
                 </div>
@@ -420,13 +485,15 @@
 
                         {% if dia.disponivel %}
 
-                            <a href="{{ url_for(
-                                'public.agendamento_horarios',
-                                servico_id=servico.id,
-                                data=dia.data.isoformat()
-                            ) }}"
-                            class="calendar-day available
-                            {% if dia.hoje %}today{% endif %}">
+                            <a
+                                href="{{ url_for(
+                                    'public.agendamento_horarios',
+                                    servico_id=servico.id,
+                                    data=dia.data.isoformat()
+                                ) }}"
+                                class="calendar-day available
+                                {% if dia.hoje %}today{% endif %}"
+                            >
 
                                 <span class="day-number">
                                     {{ dia.numero }}
@@ -439,6 +506,7 @@
                                 <span class="day-vacancies">
 
                                     {{ dia.vagas }}
+
                                     {% if dia.vagas == 1 %}
                                         vaga
                                     {% else %}
@@ -453,8 +521,10 @@
                         {% else %}
 
 
-                            <div class="calendar-day disabled
-                                {% if dia.hoje %}today{% endif %}">
+                            <div
+                                class="calendar-day disabled
+                                {% if dia.hoje %}today{% endif %}"
+                            >
 
                                 <span class="day-number">
                                     {{ dia.numero }}
@@ -477,7 +547,6 @@
 
 
                 <div class="calendar-legend">
-
 
                     <div class="legend-item">
 
@@ -505,7 +574,6 @@
 
                     </div>
 
-
                 </div>
 
 
@@ -517,26 +585,4 @@
 
 </section>
 
-</main>
-
-
-<footer class="footer">
-
-    <div class="container">
-
-        <strong>
-            Prefeitura Municipal de Uauá
-        </strong>
-
-        <span>
-            Secretaria de Desenvolvimento Social e Combate à Pobreza — SEDES
-        </span>
-
-    </div>
-
-</footer>
-
-
-</body>
-
-</html>
+{% endblock %}

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -5,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Informações - Agendamento RG/CIN</title>
+    <title>Documentos Necessários - Agendamento RG/CIN</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
@@ -29,11 +30,6 @@
 
         </div>
 
-        <a href="{{ url_for('auth.login') }}"
-           class="btn-login">
-            Área do Servidor
-        </a>
-
     </div>
 
 </header>
@@ -52,7 +48,7 @@
                 </span>
 
                 <h1>
-                    Informações sobre o atendimento
+                    Documentos Necessários
                 </h1>
 
                 <p>
@@ -123,7 +119,7 @@
 
             {% endfor %}
 
-                                         
+
             <div class="hero-buttons"
                  style="justify-content: center; margin-top: 40px;">
 
@@ -133,7 +129,7 @@
                 </a>
 
                 <a href="{{ url_for('public.index') }}"
-                   class="btn-secondary">
+                   class="btn-primary">
                     Voltar para o início
                 </a>
 
@@ -156,6 +152,14 @@
 
         <span>
             Secretaria de Desenvolvimento Social e Combate à Pobreza — SEDES
+        </span>
+
+        <span>
+            Avenida João Borges de Sá — próximo à garagem da Prefeitura
+        </span>
+
+        <span>
+            Atendimento por ordem de chegada
         </span>
 
     </div>

@@ -1,4 +1,3 @@
-
 <!doctype html>
 
 <html lang="pt-BR">
@@ -14,7 +13,7 @@
 
     <title>
         {% block title %}
-        Agendamento RG - SEDES Uauá
+        Agendamento RG/CIN - SEDES Uauá
         {% endblock %}
     </title>
 
@@ -115,66 +114,30 @@
         }
 
 
-        /*
-        ========================================
-        SUCESSO
-        ========================================
-        */
-
         .flash-success {
-
             background: #f0fdf4;
-
             color: #166534;
-
             border-color: #bbf7d0;
         }
 
 
-        /*
-        ========================================
-        ERRO
-        ========================================
-        */
-
         .flash-danger {
-
             background: #fef2f2;
-
             color: #991b1b;
-
             border-color: #fecaca;
         }
 
 
-        /*
-        ========================================
-        AVISO
-        ========================================
-        */
-
         .flash-warning {
-
             background: #fffbeb;
-
             color: #92400e;
-
             border-color: #fde68a;
         }
 
 
-        /*
-        ========================================
-        INFORMAÇÃO
-        ========================================
-        */
-
         .flash-info {
-
             background: #eff6ff;
-
             color: #1e40af;
-
             border-color: #bfdbfe;
         }
 
@@ -185,21 +148,39 @@
         ========================================
         */
 
-        footer {
-
-            padding: 22px 20px;
-
-            text-align: center;
-
-            background: #ffffff;
-
-            border-top: 1px solid #e5e7eb;
-
-            color: #6b7280;
-
+        .footer {
+            width: 100%;
+            margin: 0;
+            padding: 28px 0;
+            background: var(--primary-dark);
+            color: var(--white);
+            border: 0;
+            box-shadow: none;
+            background-image: none;
+            box-sizing: border-box;
+            position: relative;
+            left: 0;
+            right: 0;
+        }
+        
+        .footer .container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-start;
+        }
+        
+        .footer strong {
+            color: var(--white);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        
+        .footer span {
+            color: rgba(255, 255, 255, 0.65);
             font-size: 13px;
         }
-
+        
 
         /*
         ========================================
@@ -210,10 +191,8 @@
         @media (max-width: 600px) {
 
             .flash-container {
-
                 padding: 12px 15px 0;
             }
-
 
             .flash-message {
 
@@ -226,12 +205,10 @@
                 border-radius: 9px;
             }
 
+            
+            .footer .container {
 
-            footer {
-
-                padding: 18px 15px;
-
-                font-size: 12px;
+                align-items: flex-start;
             }
 
         }
@@ -245,7 +222,6 @@
 
 
     <main>
-
 
         {% with mensagens = get_flashed_messages(with_categories=true) %}
 
@@ -272,14 +248,30 @@
 
         {% block content %}{% endblock %}
 
-
     </main>
 
 
-    <footer>
+    <footer class="footer">
 
-        Secretaria de Desenvolvimento Social e Combate à Pobreza
-        · Prefeitura Municipal de Uauá
+        <div class="container">
+
+            <strong>
+                Prefeitura Municipal de Uauá
+            </strong>
+
+            <span>
+                Secretaria de Desenvolvimento Social e Combate à Pobreza — SEDES
+            </span>
+
+            <span>
+                Avenida João Borges de Sá — próximo à garagem da Prefeitura
+            </span>
+
+            <span>
+                Atendimento por ordem de chegada
+            </span>
+
+        </div>
 
     </footer>
 

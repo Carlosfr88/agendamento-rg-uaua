@@ -252,13 +252,18 @@
   ========================= */
   
   .footer {
-  width: 100%;
-  background: var(--primary-dark);
-  color: var(--white);
-  padding: 28px 0;
-  border: 0;
-  box-shadow: none;
-  background-image: none;
+    width: 100%;
+    margin: 0;
+    padding: 28px 0;
+    background: var(--primary-dark);
+    color: var(--white);
+    border: 0;
+    box-shadow: none;
+    background-image: none;
+    box-sizing: border-box;
+    position: relative;
+    left: 0;
+    right: 0;
   }
   
   .footer .container {
@@ -288,6 +293,16 @@
   background-image: none !important;
   box-shadow: none !important;
   }
+
+  .pagina-agendamento {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .pagina-agendamento main {
+    flex: 1;
+  }
   
   /* =========================
   TABLET
@@ -295,7 +310,7 @@
   
   @media (max-width: 800px) {
   
-  ```
+  
   .topbar-content {
       min-height: auto;
       padding: 18px 0;
@@ -329,8 +344,8 @@
   .services {
       padding: 55px 0;
   }
-  ```
   
+    
   }
   
   /* =========================
@@ -339,7 +354,7 @@
   
   @media (max-width: 520px) {
   
-  ```
+  
   .container {
       width: min(100% - 28px, 1180px);
   }
@@ -373,7 +388,6 @@
   .section-header h2 {
       font-size: 29px;
   }
-  ```
-  
+
+    
   }
-  
