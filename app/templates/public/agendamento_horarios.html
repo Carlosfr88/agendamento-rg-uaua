@@ -36,10 +36,24 @@ Agenda do dia - Agendamento RG
 }
 
 .calendar-brand-title {
-    color: #123b5d;
-    font-size: 20px;
+
+    background: linear-gradient(
+        90deg,
+        var(--primary),
+        var(--accent)
+    );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    background-clip: text;
+
+    font-size: 25px;
+
     font-weight: 800;
+
     line-height: 1.1;
+
 }
 
 .calendar-brand-subtitle {
@@ -418,17 +432,8 @@ Agenda do dia - Agendamento RG
 <div class="container">
 
     <div class="calendar-brand">
-
-        <span class="calendar-brand-title">
-            SEDES
-        </span>
-
-        <span class="calendar-brand-subtitle">
-            Secretaria de Desenvolvimento Social e Combate à Pobreza
-        </span>
-
+        <span class="calendar-brand-title">SEDES</span>
     </div>
-
 
     <a
         href="{{ url_for(

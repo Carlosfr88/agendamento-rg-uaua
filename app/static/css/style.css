@@ -3,7 +3,7 @@
     padding: 0;
     box-sizing: border-box;
     }
-  
+
   :root {
   --primary: #123b5d;
   --primary-dark: #0b2941;
@@ -14,35 +14,35 @@
   --muted: #65717d;
   --border: #e1e6eb;
   }
-  
+
   html,
   body {
   margin: 0;
   padding: 0;
   min-height: 100%;
   }
-  
+
   body {
   font-family: Arial, Helvetica, sans-serif;
   background: var(--background);
   color: var(--text);
   line-height: 1.6;
   }
-  
+
   a {
   text-decoration: none;
   color: inherit;
   }
-  
+
   .container {
   width: min(1180px, calc(100% - 40px));
   margin: 0 auto;
   }
-  
+
   /* =========================
   CABEÇALHO
   ========================= */
-  
+
   .topbar {
   width: 100%;
   background: #ffffff;
@@ -50,7 +50,7 @@
   box-shadow: none;
   background-image: none;
   }
-  
+
   .topbar-content {
   min-height: 76px;
   display: flex;
@@ -58,24 +58,38 @@
   justify-content: space-between;
   gap: 20px;
   }
-  
+
   .brand {
   display: flex;
   flex-direction: column;
   }
-  
+
   .brand-title {
-  color: var(--primary);
-  font-size: 25px;
-  font-weight: 800;
-  letter-spacing: 1px;
+
+    background: linear-gradient(
+      90deg,
+      var(--primary),
+      var(--accent)
+    );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    background-clip: text;
+
+    font-size: 25px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
   }
-  
+
   .brand-subtitle {
   color: var(--muted);
   font-size: 12px;
   }
-  
+
   .btn-login {
   border: 1px solid var(--primary);
   color: var(--primary);
@@ -86,16 +100,16 @@
   transition: 0.2s;
   background: transparent;
   }
-  
+
   .btn-login:hover {
   background: var(--primary);
   color: var(--white);
   }
-  
+
   /* =========================
   ÁREA PRINCIPAL
   ========================= */
-  
+
   .hero {
   width: 100%;
   background: var(--primary);
@@ -104,17 +118,17 @@
   box-shadow: none;
   background-image: none;
   }
-  
+
   .hero-content {
   min-height: 430px;
   display: flex;
   align-items: center;
   }
-  
+
   .hero-text {
   max-width: 720px;
   }
-  
+
   .eyebrow {
   display: inline-block;
   margin-bottom: 14px;
@@ -123,26 +137,26 @@
   letter-spacing: 1.5px;
   opacity: 0.8;
   }
-  
+
   .hero h1 {
   font-size: clamp(38px, 5vw, 62px);
   line-height: 1.05;
   margin-bottom: 22px;
   }
-  
+
   .hero p {
   max-width: 650px;
   font-size: 18px;
   color: rgba(255, 255, 255, 0.82);
   margin-bottom: 32px;
   }
-  
+
   .hero-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   }
-  
+
   .btn-primary,
   .btn-secondary {
   display: inline-flex;
@@ -154,56 +168,56 @@
   font-weight: 700;
   font-size: 14px;
   }
-  
+
   .btn-primary {
   background: var(--white);
   color: var(--primary);
   }
-  
+
   .btn-secondary {
   border: 1px solid rgba(255, 255, 255, 0.4);
   color: var(--white);
   }
-  
+
   .btn-primary:hover,
   .btn-secondary:hover {
   opacity: 0.88;
   }
-  
+
   /* =========================
   SERVIÇOS
   ========================= */
-  
+
   .services {
   padding: 75px 0;
   background: var(--background);
   }
-  
+
   .section-header {
   max-width: 650px;
   margin-bottom: 35px;
   }
-  
+
   .section-header .eyebrow {
   color: var(--accent);
   margin-bottom: 8px;
   }
-  
+
   .section-header h2 {
   font-size: 34px;
   margin-bottom: 8px;
   }
-  
+
   .section-header p {
   color: var(--muted);
   }
-  
+
   .cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 22px;
   }
-  
+
   .card {
   background: var(--white);
   border: 1px solid var(--border);
@@ -214,7 +228,7 @@
   flex-direction: column;
   box-shadow: none;
   }
-  
+
   .card-icon {
   width: 42px;
   height: 42px;
@@ -228,29 +242,29 @@
   font-weight: 700;
   margin-bottom: 20px;
   }
-  
+
   .card h3 {
   font-size: 21px;
   margin-bottom: 10px;
   }
-  
+
   .card p {
   color: var(--muted);
   font-size: 14px;
   margin-bottom: 20px;
   }
-  
+
   .card-link {
   margin-top: auto;
   color: var(--accent);
   font-weight: 700;
   font-size: 14px;
   }
-  
+
   /* =========================
   RODAPÉ
   ========================= */
-  
+
   .footer {
     width: 100%;
     margin: 0;
@@ -265,22 +279,22 @@
     left: 0;
     right: 0;
   }
-  
+
   .footer .container {
   display: flex;
   flex-direction: column;
   gap: 4px;
   }
-  
+
   .footer span {
   color: rgba(255, 255, 255, 0.65);
   font-size: 13px;
   }
-  
+
   /* =========================
   REMOVER EFEITOS EXTRAS
   ========================= */
-  
+
   .topbar::before,
   .topbar::after,
   .footer::before,
@@ -299,95 +313,95 @@
     display: flex;
     flex-direction: column;
   }
-  
+
   .pagina-agendamento main {
     flex: 1;
   }
-  
+
   /* =========================
   TABLET
   ========================= */
-  
+
   @media (max-width: 800px) {
-  
-  
+
+
   .topbar-content {
       min-height: auto;
       padding: 18px 0;
       align-items: flex-start;
   }
-  
+
   .brand-subtitle {
       max-width: 240px;
   }
-  
+
   .btn-login {
       white-space: nowrap;
   }
-  
+
   .hero-content {
       min-height: 470px;
   }
-  
+
   .hero h1 {
       font-size: 42px;
   }
-  
+
   .hero p {
       font-size: 16px;
   }
-  
+
   .cards {
       grid-template-columns: 1fr;
   }
-  
+
   .services {
       padding: 55px 0;
   }
-  
-    
+
+
   }
-  
+
   /* =========================
   CELULAR
   ========================= */
-  
+
   @media (max-width: 520px) {
-  
-  
+
+
   .container {
       width: min(100% - 28px, 1180px);
   }
-  
+
   .topbar-content {
       flex-direction: column;
   }
-  
+
   .btn-login {
       width: 100%;
       text-align: center;
   }
-  
+
   .hero-content {
       min-height: 500px;
   }
-  
+
   .hero h1 {
       font-size: 36px;
   }
-  
+
   .hero-buttons {
       flex-direction: column;
   }
-  
+
   .btn-primary,
   .btn-secondary {
       width: 100%;
   }
-  
+
   .section-header h2 {
       font-size: 29px;
   }
 
-    
+
   }
