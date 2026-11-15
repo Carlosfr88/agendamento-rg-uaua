@@ -5,11 +5,6 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 INSTANCE_DIR = BASE_DIR / "instance"
 
-INSTANCE_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
-
 
 class Config:
 
