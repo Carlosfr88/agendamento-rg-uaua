@@ -722,24 +722,157 @@
     box-shadow: none;
 }
 
-/* Centralização definitiva dos direitos autorais */
+/* DIREITOS AUTORAIS — AJUSTE DEFINITIVO */
+
 .footer .footer-copyright {
-    display: block !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 15px 0 0 0 !important;
-    padding: 10px 5px 0 !important;
+    display: block;
+    width: 100%;
+    max-width: none;
+    margin: 12px 0 0;
+    padding: 10px 5px 0;
     box-sizing: border-box;
-    text-align: center !important;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+
+    text-align: center;
     white-space: nowrap;
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
-    font-size: 12px;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-weight: 400;
     line-height: 1.5;
+
+    color: #aebdca;
 }
 
 @media (max-width: 600px) {
     .footer .footer-copyright {
+        font-size: 12px;
         white-space: normal;
-        font-size: 11px;
+    }
+}
+
+
+/* ========================================
+   CORREÇÃO DOS BOTÕES DE AGENDAMENTO
+   SEÇÃO ORIENTAÇÕES
+======================================== */
+
+.orientacoes-acao {
+    margin-top: 38px;
+    text-align: center;
+}
+
+.orientacoes-acao > p {
+    margin: 0 0 22px;
+    color: #374151;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.orientacoes-acao .hero-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 14px;
+    width: 100%;
+}
+
+.orientacoes-acao .hero-buttons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 190px;
+    min-height: 48px;
+    padding: 12px 22px;
+    margin: 0;
+    border-radius: 6px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    white-space: normal;
+    box-sizing: border-box;
+    transition: all 0.25s ease;
+}
+
+
+/* NOVO AGENDAMENTO */
+.orientacoes-acao .btn-primary {
+    background: var(--background);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    transition: all 0.25s ease;
+}
+
+/* CONSULTAR AGENDAMENTO */
+.orientacoes-acao .btn-orientacao-secondary {
+    background: var(--background);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    transition: all 0.25s ease;
+}
+
+/* EFEITO AO PASSAR O MOUSE */
+.orientacoes-acao .btn-primary:hover,
+.orientacoes-acao .btn-orientacao-secondary:hover {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 12px rgba(18, 59, 93, 0.18);
+}
+
+/* EFEITO AO CLICAR */
+.orientacoes-acao .btn-primary:active,
+.orientacoes-acao .btn-orientacao-secondary:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.orientacoes-acao .btn-orientacao-secondary:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(18, 59, 93, 0.18);
+}
+
+/* Celulares */
+@media (max-width: 520px) {
+    .orientacoes-acao .hero-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .orientacoes-acao .hero-buttons a {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .orientacoes-acao > p {
+        font-size: 14px;
+    }
+}
+
+/* TAMANHO DEFINITIVO DOS DIREITOS AUTORAIS */
+.footer .footer-copyright {
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    color: #c5d0da !important;
+    line-height: 1.6 !important;
+    text-align: center !important;
+}
+
+@media (max-width: 600px) {
+    .footer .footer-copyright {
+        font-size: 12px !important;
     }
 }
