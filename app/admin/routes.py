@@ -1,3 +1,4 @@
+import io
 from datetime import datetime, date, time, timedelta
 
 from flask import (
@@ -6,6 +7,7 @@ from flask import (
     redirect,
     url_for,
     request,
+    send_file,
     flash
 )
 
@@ -14,6 +16,20 @@ from flask_login import (
     current_user
 )
 
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import mm
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle
+)
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
 from ..extensions import db
 from ..models import (
     User,
@@ -2596,44 +2612,288 @@ def alterar_status_bloqueio(bloqueio_id):
         url_for("admin.bloqueios")
     )
 
+
+def _obter_query_relatorios():
+    """Monta a consulta de relatórios aplicando os filtros informados."""
+
+    query = Agendamento.query
+
+    data_inicio = request.args.get("data_inicio", "").strip()
+    data_fim = request.args.get("data_fim", "").strip()
+    nome = request.args.get("nome", "").strip()
+    cpf = request.args.get("cpf", "").strip()
+
+    # Filtro por data inicial
+    if data_inicio:
+        try:
+            data_inicio_convertida = date.fromisoformat(data_inicio)
+            query = query.filter(
+                Agendamento.data >= data_inicio_convertida
+            )
+        except ValueError:
+            flash("A data inicial informada é inválida.", "warning")
+            data_inicio = ""
+
+    # Filtro por data final
+    if data_fim:
+        try:
+            data_fim_convertida = date.fromisoformat(data_fim)
+            query = query.filter(
+                Agendamento.data <= data_fim_convertida
+            )
+        except ValueError:
+            flash("A data final informada é inválida.", "warning")
+            data_fim = ""
+
+    # Filtro por nome
+    if nome:
+        query = query.filter(
+            Agendamento.nome.ilike(f"%{nome}%")
+        )
+
+    # Filtro por CPF, aceitando números com ou sem pontuação
+    if cpf:
+        cpf_numeros = "".join(
+            caractere for caractere in cpf
+            if caractere.isdigit()
+        )
+
+        if cpf_numeros:
+            cpf_sem_pontuacao = db.func.replace(
+                db.func.replace(Agendamento.cpf, ".", ""),
+                "-",
+                ""
+            )
+
+            query = query.filter(
+                cpf_sem_pontuacao.ilike(f"%{cpf_numeros}%")
+            )
+
+    query = query.order_by(
+        Agendamento.data.desc(),
+        Agendamento.horario.desc()
+    )
+
+    filtros = {
+        "data_inicio": data_inicio,
+        "data_fim": data_fim,
+        "nome": nome,
+        "cpf": cpf
+    }
+
+    return query, filtros
+
+
+def _obter_indicadores_relatorios(query=None):
+    """Retorna indicadores considerando a consulta recebida."""
+
+    if query is None:
+        query = Agendamento.query
+
+    return {
+        "total": query.count(),
+        "agendados": query.filter(
+            Agendamento.status == "agendado"
+        ).count(),
+        "atendidos": query.filter(
+            Agendamento.status == "atendido"
+        ).count(),
+        "cancelados": query.filter(
+            Agendamento.status == "cancelado"
+        ).count(),
+        "nao_compareceu": query.filter(
+            Agendamento.status == "nao_compareceu"
+        ).count()
+    }
+
+
 @admin_bp.route("/relatorios")
 @login_required
 def relatorios():
 
-    total = Agendamento.query.count()
+    query, filtros = _obter_query_relatorios()
 
-    atendidos = (
-        Agendamento.query
-        .filter_by(status="atendido")
-        .count()
-    )
-
-    cancelados = (
-        Agendamento.query
-        .filter_by(status="cancelado")
-        .count()
-    )
-
-    nao_compareceu = (
-        Agendamento.query
-        .filter_by(status="nao_compareceu")
-        .count()
-    )
-
-    agendados = (
-        Agendamento.query
-        .filter_by(status="agendado")
-        .count()
-    )
+    indicadores = _obter_indicadores_relatorios(query)
 
     return render_template(
         "admin/relatorios.html",
-        total=total,
-        agendados=agendados,
-        atendidos=atendidos,
-        cancelados=cancelados,
-        nao_compareceu=nao_compareceu
+        **indicadores,
+        **filtros
     )
+
+@admin_bp.route("/relatorios/pdf")
+@login_required
+def relatorios_pdf():
+
+    query, filtros = _obter_query_relatorios()
+
+    indicadores = _obter_indicadores_relatorios(query)
+    buffer = io.BytesIO()
+
+    documento = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=20 * mm,
+        leftMargin=20 * mm,
+        topMargin=20 * mm,
+        bottomMargin=20 * mm
+    )
+
+    estilos = getSampleStyleSheet()
+
+    conteudo = [
+        Paragraph(
+            "Relatorio de Agendamentos RG/CIN",
+            estilos["Title"]
+        ),
+        Spacer(1, 6 * mm),
+        Paragraph(
+            "Prefeitura Municipal de Uaua - SEDES",
+            estilos["Normal"]
+        ),
+        Spacer(1, 4 * mm),
+        Paragraph(
+            "Gerado em: " + datetime.now().strftime(
+                "%d/%m/%Y as %H:%M"
+            ),
+            estilos["Normal"]
+        ),
+        Spacer(1, 10 * mm)
+    ]
+
+    linhas = [
+        ["Indicador", "Quantidade"],
+        ["Total de agendamentos", indicadores["total"]],
+        ["Agendados", indicadores["agendados"]],
+        ["Atendidos", indicadores["atendidos"]],
+        ["Cancelados", indicadores["cancelados"]],
+        ["Nao compareceu", indicadores["nao_compareceu"]]
+    ]
+
+    tabela = Table(
+        linhas,
+        colWidths=[110 * mm, 40 * mm]
+    )
+
+    tabela.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1f4e78")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#d1d5db")),
+        ("ALIGN", (1, 1), (1, -1), "CENTER"),
+        ("PADDING", (0, 0), (-1, -1), 9),
+        ("BACKGROUND", (0, 1), (-1, -1), colors.white)
+    ]))
+
+    conteudo.append(tabela)
+
+    documento.build(conteudo)
+
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="relatorio_agendamentos.pdf",
+        mimetype="application/pdf"
+    )
+
+
+@admin_bp.route("/relatorios/excel")
+@login_required
+def relatorios_excel():
+
+    query, filtros = _obter_query_relatorios()
+
+    indicadores = _obter_indicadores_relatorios(query)
+
+    arquivo = Workbook()
+    planilha = arquivo.active
+    planilha.title = "Relatorios"
+
+    planilha.merge_cells("A1:B1")
+    planilha["A1"] = "Relatorio de Agendamentos RG/CIN"
+    planilha["A1"].font = Font(
+        bold=True,
+        size=14,
+        color="FFFFFF"
+    )
+    planilha["A1"].fill = PatternFill(
+        "solid",
+        fgColor="1F4E78"
+    )
+    planilha["A1"].alignment = Alignment(
+        horizontal="center"
+    )
+
+    planilha.merge_cells("A2:B2")
+    planilha["A2"] = "Prefeitura Municipal de Uaua - SEDES"
+
+    planilha.merge_cells("A3:B3")
+    planilha["A3"] = (
+        "Gerado em: "
+        + datetime.now().strftime("%d/%m/%Y %H:%M")
+    )
+
+    planilha.append([])
+    planilha.append(["Indicador", "Quantidade"])
+
+    dados = [
+        ["Total de agendamentos", indicadores["total"]],
+        ["Agendados", indicadores["agendados"]],
+        ["Atendidos", indicadores["atendidos"]],
+        ["Cancelados", indicadores["cancelados"]],
+        ["Nao compareceu", indicadores["nao_compareceu"]]
+    ]
+
+    for linha in dados:
+        planilha.append(linha)
+
+    for celula in planilha[5]:
+        celula.font = Font(
+            bold=True,
+            color="FFFFFF"
+        )
+        celula.fill = PatternFill(
+            "solid",
+            fgColor="1F4E78"
+        )
+        celula.alignment = Alignment(
+            horizontal="center"
+        )
+
+    for linha in planilha.iter_rows(
+        min_row=6,
+        max_row=10,
+        min_col=1,
+        max_col=2
+    ):
+        linha[0].alignment = Alignment(
+            horizontal="left"
+        )
+        linha[1].alignment = Alignment(
+            horizontal="center"
+        )
+
+    planilha.column_dimensions["A"].width = 35
+    planilha.column_dimensions["B"].width = 18
+
+    buffer = io.BytesIO()
+    arquivo.save(buffer)
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="relatorio_agendamentos.xlsx",
+        mimetype=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+
 
 @admin_bp.route("/backup")
 @login_required

@@ -1,5 +1,5 @@
-<!doctype html>
 
+<!doctype html>
 <html lang="pt-BR">
 
 <head>
@@ -22,6 +22,12 @@
         href="{{ url_for('static', filename='css/style.css') }}"
     >
 
+    <!-- Font Awesome para os ícones -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
     <style>
 
         * {
@@ -41,18 +47,12 @@
             font-family: Arial, Helvetica, sans-serif;
         }
 
-
         /*
         ========================================
         CABEÇALHO
         ========================================
         */
-
-        .topbar {
-            display: none;
-        }
-
-
+        
         /*
         ========================================
         CONTEÚDO PRINCIPAL
@@ -63,7 +63,6 @@
             min-height: 100vh;
         }
 
-
         /*
         ========================================
         MENSAGENS
@@ -71,48 +70,28 @@
         */
 
         .flash-container {
-
             width: 100%;
             max-width: 1400px;
-
             margin: 0 auto;
-
             padding: 16px 28px 0;
         }
 
-
         .flash-message {
-
             display: flex;
-
             align-items: center;
-
             min-height: 48px;
-
             margin-bottom: 10px;
-
             padding: 12px 16px;
-
             border-radius: 10px;
-
             border: 1px solid #e5e7eb;
-
             background: #ffffff;
-
             color: #374151;
-
             font-family: Arial, Helvetica, sans-serif;
-
             font-size: 14px;
-
             font-weight: 600;
-
             line-height: 1.4;
-
-            box-shadow:
-                0 4px 14px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
         }
-
 
         .flash-success {
             background: #f0fdf4;
@@ -120,13 +99,11 @@
             border-color: #bbf7d0;
         }
 
-
         .flash-danger {
             background: #fef2f2;
             color: #991b1b;
             border-color: #fecaca;
         }
-
 
         .flash-warning {
             background: #fffbeb;
@@ -134,13 +111,11 @@
             border-color: #fde68a;
         }
 
-
         .flash-info {
             background: #eff6ff;
             color: #1e40af;
             border-color: #bfdbfe;
         }
-
 
         /*
         ========================================
@@ -148,77 +123,242 @@
         ========================================
         */
 
+        
         .footer {
             width: 100%;
             margin: 0;
-            padding: 28px 0;
+            padding: 30px 20px;
             background: var(--primary-dark);
             color: var(--white);
             border: 0;
             box-shadow: none;
             background-image: none;
-            box-sizing: border-box;
-            position: relative;
-            left: 0;
-            right: 0;
         }
 
         .footer .container {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            align-items: flex-start;
+            align-items: center;
+            gap: 12px;
         }
 
-        .footer strong {
+        .footer .footer-title {
+            color: var(--white);
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .footer .footer-subtitle {
+            margin-top: -8px;
+        }
+
+        .footer .footer-subtitle {
+            color: rgba(255,255,255,.72);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            column-gap: 120px;
+            row-gap: 2px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 20px;
+            margin: 0 auto;
+        }
+
+        .footer-column {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+        }
+
+        .footer-column > strong {
             color: var(--white);
             font-size: 13px;
-            font-weight: 700;
         }
 
         .footer span {
-            color: rgba(255, 255, 255, 0.65);
+            color: rgba(255,255,255,.75);
             font-size: 13px;
+            line-height: 1.5;
         }
 
-
-        /*
-        ========================================
-        RESPONSIVO
-        ========================================
-        */
-
-        @media (max-width: 600px) {
-
-            .flash-container {
-                padding: 12px 15px 0;
-            }
-
-            .flash-message {
-
-                min-height: 46px;
-
-                padding: 11px 14px;
-
-                font-size: 13px;
-
-                border-radius: 9px;
-            }
-
-
-            .footer .container {
-
-                align-items: flex-start;
-            }
-
+        .footer .footer-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
         }
+
+        .footer .footer-info i {
+            width: 16px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            text-align: center;
+        }
+
+        .footer .footer-development strong {
+            color: var(--white);
+        }
+
+        .footer-divider {
+            width: 100%;
+            max-width: 900px;
+            height: 1px;
+            margin: 4px auto;
+            background: rgba(255,255,255,.18);
+        }
+
+    
+
+            
+/* ========================================
+   CABEÇALHO INSTITUCIONAL
+======================================== */
+
+.topbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+/* SEDES e identificação da Prefeitura */
+
+.topbar .brand {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 14px;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+}
+
+.topbar .brand-title {
+    flex-shrink: 0;
+}
+
+.header-logo-nome {
+    display: block;
+    width: auto;
+    height: 38px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* Selo de 100 anos e botões */
+
+.topbar .header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 8px;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.header-logo-100 {
+    display: block;
+    width: auto;
+    height: 42px;
+    object-fit: contain;
+    flex-shrink: 0;
+    margin-right: 8px;
+}
+
+/* Menus administrativos */
+
+.topbar .header-actions a {
+    flex-shrink: 0;
+}
+
+/* Adaptação para telas menores */
+
+@media (max-width: 1100px) {
+
+    .topbar-content {
+        flex-wrap: wrap;
+        justify-content: center;
+        row-gap: 12px;
+    }
+
+    .topbar .brand {
+        justify-content: center;
+    }
+
+    .topbar .header-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+        white-space: normal;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .header-logo-nome {
+        height: 32px;
+    }
+
+    .header-logo-100 {
+        height: 36px;
+    }
+
+    .topbar .header-actions {
+        gap: 7px;
+    }
+
+}
+
+        
 
     </style>
 
 </head>
 
-
 <body>
+
+    
+    
+    <header class="topbar">
+
+        <div class="container topbar-content">
+
+            <!-- Identificação à esquerda -->
+            <div class="brand">
+                <span class="brand-title">SEDES</span>
+
+                <img
+                    src="{{ url_for('static', filename='img/logo_nome.png') }}"
+                    alt="Identificação da Prefeitura"
+                    class="header-logo-nome"
+                >
+            </div>
+
+            <!-- Selo e menus à direita -->
+            <div class="header-actions">
+
+                <img
+                    src="{{ url_for('static', filename='img/100anos.png') }}"
+                    alt="Comemoração dos 100 anos"
+                    class="header-logo-100"
+                >
+
+                {% block header_actions %}{% endblock %}
+
+            </div>
+
+        </div>
+
+    </header>
+
 
 
     <main>
@@ -232,9 +372,7 @@
                     {% for categoria, mensagem in mensagens %}
 
                         <div class="flash-message flash-{{ categoria }}">
-
                             {{ mensagem }}
-
                         </div>
 
                     {% endfor %}
@@ -245,31 +383,85 @@
 
         {% endwith %}
 
-
         {% block content %}{% endblock %}
 
     </main>
 
-
+    <!-- RODAPÉ -->
+    
     <footer class="footer">
 
         <div class="container">
 
-            <strong>
+            <strong class="footer-title">
                 Prefeitura Municipal de Uauá
             </strong>
 
-            <span>
-                Secretaria de Desenvolvimento Social e Combate à Pobreza
+            <span class="footer-subtitle">
+                Secretaria de Desenvolvimento Social e Combate à Pobreza — SEDES
             </span>
 
-            <span>
-                Avenida João Borges de Sá — próximo à garagem da Prefeitura
-            </span>
+            <div class="footer-grid">
 
-            <span>
-                Atendimento por ordem de chegada
-            </span>
+                <div class="footer-column">
+
+                    <strong>
+                        Informações de localização
+                    </strong>
+
+                    <span class="footer-info">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Avenida João Borges de Sá — próximo à garagem da Prefeitura
+                    </span>
+
+                    <span class="footer-info">
+                        <i class="fa-solid fa-map"></i>
+                        Uauá — BA | CEP: 48950-000
+                    </span>
+
+                </div>
+
+                <div class="footer-column">
+                    <strong>Atendimento</strong>
+                    <span class="footer-info">
+                        <i class="fa-solid fa-clock"></i>
+                        Atendimento por ordem de chegada
+                    </span>
+                    <span class="footer-info">
+                        <i class="fa-regular fa-calendar"></i>
+                        Segunda a Sexta-feira: 08:00 às 14:00
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="footer-divider"></div>
+
+                        <div class="footer-grid">
+
+                <div class="footer-column">
+
+                    <span class="footer-info footer-development">
+                        <i class="fa-solid fa-code"></i>
+                        Desenvolvido por <strong>CRIATIO Web e TI</strong>
+                    </span>
+
+                </div>
+
+                <div class="footer-column">
+
+                    <span class="footer-info footer-development">
+                        <i class="fa-solid fa-server"></i>
+                        Mantido pelo <strong>DTI — Departamento de Tecnologia da Informação</strong>
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="footer-copyright">
+                © 2026 Prefeitura Municipal de Uauá - BA. Todos os direitos reservados.
+            </div>
 
         </div>
 

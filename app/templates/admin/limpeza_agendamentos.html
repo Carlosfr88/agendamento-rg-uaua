@@ -1,162 +1,186 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
+ 
+{% extends "base.html" %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+{% block title %}Limpeza de Agendamentos - Painel Administrativo{% endblock %}
 
-    <title>Limpeza de Agendamentos</title>
+{% block content %}
 
-    <style>
-        * {
-            box-sizing: border-box;
+<style>
+    .limpeza-page {
+        max-width: 1400px;
+        margin: 30px auto;
+        padding: 0 20px;
+        color: #1f2937;
+    }
+
+    .limpeza-page * {
+        box-sizing: border-box;
+    }
+
+    .limpeza-page .header,
+    .limpeza-page .filters,
+    .limpeza-page .result {
+        background: #ffffff;
+        padding: 22px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .limpeza-page h1 {
+        margin: 0 0 8px;
+        color: #111827;
+        font-size: 25px;
+    }
+
+    .limpeza-page .header p {
+        margin: 0;
+        color: #6b7280;
+    }
+
+    .limpeza-page .warning {
+        background: #fff3cd;
+        border: 1px solid #ffe69c;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        color: #664d03;
+    }
+
+    .limpeza-page .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+    }
+
+    .limpeza-page label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 6px;
+        color: #374151;
+    }
+
+    .limpeza-page input,
+    .limpeza-page select {
+        width: 100%;
+        min-height: 40px;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #1f2937;
+    }
+
+    .limpeza-page input[type="checkbox"] {
+        width: auto;
+        min-height: auto;
+        padding: 0;
+    }
+
+    .limpeza-page .buttons {
+        margin-top: 18px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .limpeza-page button,
+    .limpeza-page .btn {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 10px 18px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .limpeza-page .btn-filter {
+        background: #ffffff;
+        color: #374151;
+    }
+
+    .limpeza-page .btn-filter:hover,
+    .limpeza-page .btn-back:hover {
+        background: #f3f4f6;
+    }
+
+    .limpeza-page .btn-back {
+        background: #ffffff;
+        color: #374151;
+    }
+
+    .limpeza-page .result {
+        overflow-x: auto;
+    }
+
+    .limpeza-page table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    .limpeza-page th,
+    .limpeza-page td {
+        padding: 11px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .limpeza-page th {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .limpeza-page .count {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .limpeza-page .empty {
+        padding: 25px;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    .limpeza-page .btn-delete {
+        background: #ffffff;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .limpeza-page .btn-delete:hover {
+        background: #fff1f2;
+    }
+
+    @media (max-width: 700px) {
+        .limpeza-page {
+            padding: 0 10px;
         }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            color: #1f2937;
+        .limpeza-page .header,
+        .limpeza-page .filters,
+        .limpeza-page .result {
+            padding: 16px;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 30px auto;
-            padding: 0 20px;
+        .limpeza-page th,
+        .limpeza-page td {
+            font-size: 13px;
         }
 
-        .header {
-            background: white;
-            padding: 22px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        .limpeza-page .buttons .btn,
+        .limpeza-page .buttons button {
+            flex: 1;
         }
+    }
+</style>
 
-        h1 {
-            margin: 0 0 8px;
-        }
-
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffe69c;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        .filters {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.08);
-        }
-
-        .filter-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-        }
-
-        .buttons {
-            margin-top: 18px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        button,
-        .btn {
-            border: none;
-            border-radius: 6px;
-            padding: 10px 18px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-filter {
-            background: #2563eb;
-            color: white;
-        }
-
-        .btn-back {
-            background: #6b7280;
-            color: white;
-        }
-
-        .result {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.08);
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th,
-        td {
-            padding: 11px;
-            border-bottom: 1px solid #e5e7eb;
-            text-align: left;
-            white-space: nowrap;
-        }
-
-        th {
-            background: #f3f4f6;
-        }
-
-        .count {
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .empty {
-            padding: 25px;
-            text-align: center;
-            color: #6b7280;
-        }
-
-        @media (max-width: 700px) {
-            .container {
-                padding: 0 10px;
-            }
-
-            th,
-            td {
-                font-size: 13px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="container">
+<div class="limpeza-page">
 
     <div class="header">
 
@@ -174,7 +198,6 @@
 
     </div>
 
-
     <div class="filters">
 
         <form method="GET">
@@ -182,30 +205,33 @@
             <div class="filter-grid">
 
                 <div>
-                    <label>Data inicial</label>
+                    <label for="data_inicio">Data inicial</label>
 
                     <input
                         type="date"
+                        id="data_inicio"
                         name="data_inicio"
                         value="{{ data_inicio }}"
                     >
                 </div>
 
                 <div>
-                    <label>Data final</label>
+                    <label for="data_fim">Data final</label>
 
                     <input
                         type="date"
+                        id="data_fim"
                         name="data_fim"
                         value="{{ data_fim }}"
                     >
                 </div>
 
                 <div>
-                    <label>Nome</label>
+                    <label for="nome">Nome</label>
 
                     <input
                         type="text"
+                        id="nome"
                         name="nome"
                         value="{{ nome }}"
                         placeholder="Nome do cidadão"
@@ -213,10 +239,11 @@
                 </div>
 
                 <div>
-                    <label>CPF</label>
+                    <label for="cpf">CPF</label>
 
                     <input
                         type="text"
+                        id="cpf"
                         name="cpf"
                         value="{{ cpf }}"
                         placeholder="CPF"
@@ -224,10 +251,11 @@
                 </div>
 
                 <div>
-                    <label>Protocolo</label>
+                    <label for="protocolo">Protocolo</label>
 
                     <input
                         type="text"
+                        id="protocolo"
                         name="protocolo"
                         value="{{ protocolo }}"
                         placeholder="Protocolo"
@@ -235,46 +263,36 @@
                 </div>
 
                 <div>
-                    <label>Status</label>
+                    <label for="status">Status</label>
 
-                    <select name="status">
+                    <select name="status" id="status">
 
-                        <option value="">
-                            Todos
-                        </option>
+                        <option value="">Todos</option>
 
                         <option
                             value="agendado"
-                            {% if status == "agendado" %}
-                                selected
-                            {% endif %}
+                            {% if status == "agendado" %}selected{% endif %}
                         >
                             Agendado
                         </option>
 
                         <option
                             value="atendido"
-                            {% if status == "atendido" %}
-                                selected
-                            {% endif %}
+                            {% if status == "atendido" %}selected{% endif %}
                         >
                             Atendido
                         </option>
 
                         <option
                             value="cancelado"
-                            {% if status == "cancelado" %}
-                                selected
-                            {% endif %}
+                            {% if status == "cancelado" %}selected{% endif %}
                         >
                             Cancelado
                         </option>
 
                         <option
                             value="nao_compareceu"
-                            {% if status == "nao_compareceu" %}
-                                selected
-                            {% endif %}
+                            {% if status == "nao_compareceu" %}selected{% endif %}
                         >
                             Não compareceu
                         </option>
@@ -283,7 +301,6 @@
                 </div>
 
             </div>
-
 
             <div class="buttons">
 
@@ -305,7 +322,7 @@
                     href="{{ url_for('admin.administradores') }}"
                     class="btn btn-back"
                 >
-                    ← Voltar
+                    Voltar
                 </a>
 
             </div>
@@ -314,14 +331,12 @@
 
     </div>
 
-
     <div class="result">
 
         <div class="count">
             {{ agendamentos|length }}
             agendamento(s) encontrado(s)
         </div>
-
 
         {% if agendamentos %}
 
@@ -335,109 +350,91 @@
             "
         >
 
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="{{ csrf_token() }}"
-        >
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        <input
-                            type="checkbox"
-                            id="selecionarTodos"
-                        >
-                    </th>
-
-                    <th>ID</th>
-                    <th>Protocolo</th>
-                    <th>Nome</th>
-                    <th>CPF</th>
-                    <th>Serviço</th>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Status</th>
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                {% for agendamento in agendamentos %}
-
-                <tr>
-
-                    <td>
-                        <input
-                            type="checkbox"
-                            name="agendamento_ids"
-                            value="{{ agendamento.id }}"
-                            class="selecionar-agendamento"
-                        >
-                    </td>
-
-                    <td>
-                        {{ agendamento.id }}
-                    </td>
-
-                    <td>
-                        {{ agendamento.protocolo }}
-                    </td>
-
-                    <td>
-                        {{ agendamento.nome }}
-                    </td>
-
-                    <td>
-                        {{ agendamento.cpf }}
-                    </td>
-
-                    <td>
-                        {{ agendamento.servico.nome }}
-                    </td>
-
-                    <td>
-                        {{ agendamento.data.strftime('%d/%m/%Y') }}
-                    </td>
-
-                    <td>
-                        {{ agendamento.horario }}
-                    </td>
-
-                    <td>
-                        {{ agendamento.status }}
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-        <div class="buttons">
-
-            <button
-                type="submit"
-                class="btn"
-                style="
-                    background: #fee2e2;
-                    color: #991b1b;
-                    border: 1px solid #fecaca;
-                "
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
             >
-                Excluir selecionados
-            </button>
-    
-        </div>
-    
-    </form>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            <input
+                                type="checkbox"
+                                id="selecionarTodos"
+                            >
+                        </th>
+
+                        <th>ID</th>
+                        <th>Protocolo</th>
+                        <th>Nome</th>
+                        <th>CPF</th>
+                        <th>Serviço</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for agendamento in agendamentos %}
+
+                    <tr>
+
+                        <td>
+                            <input
+                                type="checkbox"
+                                name="agendamento_ids"
+                                value="{{ agendamento.id }}"
+                                class="selecionar-agendamento"
+                            >
+                        </td>
+
+                        <td>{{ agendamento.id }}</td>
+
+                        <td>{{ agendamento.protocolo }}</td>
+
+                        <td>{{ agendamento.nome }}</td>
+
+                        <td>{{ agendamento.cpf }}</td>
+
+                        <td>{{ agendamento.servico.nome }}</td>
+
+                        <td>
+                            {{ agendamento.data.strftime('%d/%m/%Y') }}
+                        </td>
+
+                        <td>{{ agendamento.horario }}</td>
+
+                        <td>{{ agendamento.status }}</td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+            <div class="buttons">
+
+                <button
+                    type="submit"
+                    class="btn-delete"
+                >
+                    Excluir selecionados
+                </button>
+
+            </div>
+
+        </form>
 
         {% else %}
 
@@ -472,5 +469,4 @@
     }
 </script>
 
-</body>
-</html>
+{% endblock %}

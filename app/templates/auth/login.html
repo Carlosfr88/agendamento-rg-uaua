@@ -1,6 +1,13 @@
+
 {% extends "base.html" %}
 
-{% block title %}Login - Agendamento RG{% endblock %}
+{% block title %}Login - Agendamento RG/CIN{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('public.index') }}" class="login-header-back">
+    Voltar
+</a>
+{% endblock %}
 
 {% block content %}
 
@@ -9,15 +16,17 @@
     <div class="login-card">
 
         <div class="login-header">
+
             <div class="login-icon">
-                RG
+                <img
+                    src="{{ url_for('static', filename='img/logo_brasao).png') }}"
+                    alt="Brasão da Prefeitura Municipal de Uauá"
+                >
             </div>
 
             <h1>Acesso administrativo</h1>
 
-            <p>
-                Entre para administrar os agendamentos.
-            </p>
+           
         </div>
 
         <form method="post">
@@ -35,6 +44,7 @@
                     placeholder="Digite seu usuário"
                     required
                 >
+
                 <input
                     type="hidden"
                     name="csrf_token"
@@ -66,18 +76,39 @@
 
         </form>
 
-        <a
-            class="back-link"
-            href="{{ url_for('public.index') }}"
-        >
-            Voltar para o início
-        </a>
-
     </div>
 
 </section>
 
 <style>
+
+/* Botão voltar no cabeçalho */
+
+.topbar .header-actions .login-header-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 18px;
+    border-radius: 7px;
+    color: #123b5d;
+    background: #ffffff;
+    border: 1px solid #d5e0e8;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.25s ease;
+}
+
+.topbar .header-actions .login-header-back:hover {
+    color: #ffffff;
+    background: #123b5d;
+    border-color: #123b5d;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Página de login */
 
 .login-page {
     min-height: calc(100vh - 120px);
@@ -100,26 +131,22 @@
 
 .login-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 18px;
 }
 
 .login-icon {
-    width: 64px;
-    height: 64px;
+    width:140px;
+    height:140px;
     margin: 0 auto 18px;
-
     display: flex;
     align-items: center;
     justify-content: center;
+}
 
-    border-radius: 16px;
-
-    background: #1f2937;
-    color: #ffffff;
-
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 1px;
+.login-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .login-header h1 {
@@ -149,13 +176,10 @@
 .form-group input {
     width: 100%;
     padding: 13px 14px;
-
     border: 1px solid #d8dee6;
     border-radius: 10px;
-
     font-size: 15px;
     outline: none;
-
     transition: 0.2s;
 }
 
@@ -168,38 +192,17 @@
     width: 100%;
     border: none;
     border-radius: 10px;
-
     padding: 14px;
-
     background: #1f2937;
     color: #ffffff;
-
     font-size: 15px;
     font-weight: 600;
-
     cursor: pointer;
-
     transition: 0.2s;
 }
 
 .primary.full:hover {
     background: #111827;
-}
-
-.back-link {
-    display: block;
-    margin-top: 24px;
-
-    text-align: center;
-
-    color: #6b7280;
-    text-decoration: none;
-
-    font-size: 14px;
-}
-
-.back-link:hover {
-    color: #1f2937;
 }
 
 @media (max-width: 600px) {
@@ -216,6 +219,12 @@
     .login-header h1 {
         font-size: 23px;
     }
+
+    .login-icon {
+        width: 120px;
+        height: 120px;
+    }
+
 }
 
 </style>

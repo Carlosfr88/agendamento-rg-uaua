@@ -1,215 +1,160 @@
-<!DOCTYPE html>
 
-<html lang="pt-BR">
+{% extends "base.html" %}
 
-<head>
+{% block title %}
+Painel Administrativo - Agendamento RG
+{% endblock %}
 
-```
-<meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Painel Administrativo - Agendamento RG</title>
-
-<link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='css/style.css') }}"
->
+{% block header_actions %}
 
 <style>
-
-    * {
-        box-sizing: border-box;
-    }
-
-    body {
-        margin: 0;
-        background: #f5f7fa;
-        color: #1f2937;
-        font-family: Arial, Helvetica, sans-serif;
-    }
-
-
-    /* =========================
-       CABEÇALHO
-    ========================= */
-
-    .admin-header {
-        background: #ffffff;
-
-        border-bottom: 1px solid #e5e7eb;
-
-        padding: 18px 30px;
-
+    .topbar .header-actions {
         display: flex;
-
         align-items: center;
-        justify-content: space-between;
-
-        gap: 20px;
-    }
-
-    .admin-title h1 {
-        margin: 0;
-
-        font-size: 23px;
-
-        color: #111827;
-    }
-
-    .admin-title p {
-        margin: 5px 0 0;
-
-        color: #6b7280;
-
-        font-size: 13px;
-    }
-
-    .admin-actions {
-        display: flex;
-    
-        align-items: center;
-    
         justify-content: flex-end;
-    
-        gap: 8px;
-    
+        gap: 10px;
         flex-wrap: wrap;
     }
 
-    .admin-user {
-        color: #374151;
-
-        font-size: 14px;
-
-        font-weight: 600;
-    }
-
-    .header-button,
-    .logout-button {
+    .topbar .header-actions .header-button,
+    .topbar .header-actions .logout-button {
         display: inline-flex;
-
         align-items: center;
         justify-content: center;
-
-        min-height: 38px;
-
-        padding: 0 12px;
-
-        border-radius: 8px;
-
-        border: 1px solid #d1d5db;
-
-        color: #374151;
-
-        background: #ffffff;
-
+        padding: 9px 15px;
+        border-radius: 7px;
         text-decoration: none;
-
-        font-size: 13px;
-
+        font-size: 14px;
         font-weight: 600;
-
         white-space: nowrap;
-
-        transition: 0.2s;
+        transition: all 0.25s ease;
     }
 
-    .header-button:hover,
-    .logout-button:hover {
-        background: #f3f4f6;
+    .topbar .header-actions .header-button {
+        color: #ffffff;
+        background: #123b5d;
+        border: 1px solid #123b5d;
     }
 
+    .topbar .header-actions .header-button:hover {
+        color: #ffffff;
+        background: #0b2c46;
+        border-color: #0b2c46;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
 
-    /* =========================
-       CONTAINER
-    ========================= */
+    .topbar .header-actions .logout-button {
+        color: #123b5d;
+        background: #ffffff;
+        border: 1px solid #d5e0e8;
+    }
 
+    .topbar .header-actions .logout-button:hover {
+        color: #ffffff;
+        background: #123b5d;
+        border-color: #123b5d;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
+    @media (max-width: 900px) {
+        .topbar .header-actions {
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .topbar .header-actions .header-button,
+        .topbar .header-actions .logout-button {
+            padding: 8px 11px;
+            font-size: 13px;
+        }
+    }
+</style>
+
+<a href="{{ url_for('admin.dashboard') }}" class="header-button">Dashboard</a>
+<a href="{{ url_for('admin.servicos') }}" class="header-button">Serviços</a>
+<a href="{{ url_for('admin.horarios') }}" class="header-button">Horários</a>
+<a href="{{ url_for('admin.administradores') }}" class="header-button">Administradores</a>
+<a href="{{ url_for('admin.informacoes') }}" class="header-button">Informações</a>
+<a class="logout-button" href="{{ url_for('auth.logout') }}">Sair</a>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+<style>
     .admin-container {
         max-width: 1400px;
-
         margin: 0 auto;
-
         padding: 28px;
     }
 
+    .admin-page-heading {
+        margin-bottom: 25px;
+    }
 
-    /* =========================
-       CARDS
-    ========================= */
+    .admin-page-heading h1 {
+        margin: 0 0 6px;
+        color: #123b5d;
+        font-size: 25px;
+    }
+
+    .admin-page-heading p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    /* INDICADORES */
 
     .stats-grid {
         display: grid;
-
-        grid-template-columns:
-            repeat(4, minmax(0, 1fr));
-
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 18px;
-
         margin-bottom: 24px;
     }
 
     .stat-card {
         background: #ffffff;
-
         border: 1px solid #e5e7eb;
-
         border-radius: 14px;
-
         padding: 20px;
-
-        box-shadow:
-            0 4px 15px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
     }
 
     .stat-label {
         color: #6b7280;
-
         font-size: 13px;
-
         margin-bottom: 8px;
     }
 
     .stat-value {
         font-size: 28px;
-
         font-weight: 700;
-
         color: #111827;
     }
 
-
-    /* =========================
-       HOJE
-    ========================= */
+    /* AGENDAMENTOS DE HOJE */
 
     .today-grid {
         display: grid;
-
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 18px;
-
         margin-bottom: 24px;
     }
 
     .today-card {
         background: #ffffff;
-
         border: 1px solid #e5e7eb;
-
         border-radius: 14px;
-
         padding: 20px;
     }
 
     .today-card h3 {
         margin: 0 0 8px;
-
         font-size: 15px;
     }
 
@@ -217,129 +162,84 @@
         font-size: 25px;
     }
 
-
-    /* =========================
-       PAINEL
-    ========================= */
+    /* PAINÉIS */
 
     .panel {
         background: #ffffff;
-
         border: 1px solid #e5e7eb;
-
         border-radius: 14px;
-
         padding: 22px;
-
         margin-bottom: 24px;
-
-        box-shadow:
-            0 4px 15px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     }
 
     .panel-title {
         margin: 0 0 18px;
-
         font-size: 18px;
-
         color: #111827;
     }
 
-
-    /* =========================
-       FILTROS
-    ========================= */
+    /* FILTROS */
 
     .filters {
         display: grid;
-
-        grid-template-columns:
-            repeat(4, minmax(0, 1fr));
-
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 15px;
     }
 
     .field {
         display: flex;
-
         flex-direction: column;
-
         gap: 6px;
     }
 
     .field label {
         font-size: 12px;
-
         font-weight: 600;
-
         color: #4b5563;
     }
 
     .field input,
     .field select {
         width: 100%;
-
         height: 42px;
-
         border: 1px solid #d1d5db;
-
         border-radius: 8px;
-
         padding: 0 12px;
-
         background: #ffffff;
-
         color: #1f2937;
-
         outline: none;
     }
 
     .field input:focus,
     .field select:focus {
         border-color: #374151;
-
-        box-shadow:
-            0 0 0 3px
-            rgba(55, 65, 81, 0.08);
+        box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.08);
     }
 
     .filter-actions {
         display: flex;
-
         align-items: end;
-
         gap: 10px;
-
         grid-column: 1 / -1;
     }
 
     .button {
         display: inline-flex;
-
         align-items: center;
-
         justify-content: center;
-
         min-height: 42px;
-
         padding: 0 18px;
-
         border-radius: 8px;
-
         text-decoration: none;
-
         font-size: 13px;
-
         font-weight: 600;
-
         cursor: pointer;
     }
 
     .button-primary {
         border: 0;
-
         background: #1f2937;
-
         color: #ffffff;
     }
 
@@ -349,9 +249,7 @@
 
     .button-secondary {
         border: 1px solid #d1d5db;
-
         background: #ffffff;
-
         color: #374151;
     }
 
@@ -359,70 +257,47 @@
         background: #f3f4f6;
     }
 
-
-    /* =========================
-       HISTÓRICO
-    ========================= */
+    /* HISTÓRICO */
 
     .history-header {
         display: flex;
-
         align-items: center;
-
         justify-content: space-between;
-
         gap: 15px;
-
         margin-bottom: 18px;
     }
 
     .history-count {
         color: #6b7280;
-
         font-size: 13px;
     }
 
     .table-wrapper {
         width: 100%;
-
         overflow-x: auto;
     }
 
     table {
         width: 100%;
-
         border-collapse: collapse;
-
         min-width: 1100px;
     }
 
     th {
         background: #f9fafb;
-
         color: #6b7280;
-
         text-align: left;
-
         font-size: 12px;
-
         font-weight: 700;
-
         padding: 13px 12px;
-
-        border-bottom:
-            1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
     }
 
     td {
         padding: 14px 12px;
-
-        border-bottom:
-            1px solid #f0f1f3;
-
+        border-bottom: 1px solid #f0f1f3;
         font-size: 13px;
-
         color: #374151;
-
         vertical-align: top;
     }
 
@@ -432,104 +307,74 @@
 
     .protocol {
         font-weight: 700;
-
         color: #111827;
     }
 
-
-    /* =========================
-       STATUS
-    ========================= */
+    /* STATUS */
 
     .status {
         display: inline-flex;
-
         align-items: center;
-
         padding: 5px 9px;
-
         border-radius: 999px;
-
         font-size: 11px;
-
         font-weight: 700;
-
         white-space: nowrap;
     }
 
     table th:last-child,
     table td:last-child {
         width: 1%;
-
         white-space: nowrap;
     }
 
     .status-agendado {
         background: #dbeafe;
-
         color: #1e40af;
     }
 
     .status-atendido {
         background: #dcfce7;
-
         color: #166534;
     }
 
     .status-cancelado {
         background: #fee2e2;
-
         color: #991b1b;
     }
 
     .status-nao-compareceu {
         background: #fef3c7;
-
         color: #92400e;
     }
 
-
-    /* =========================
-       AÇÕES
-    ========================= */
+    /* AÇÕES */
 
     .status-actions {
         display: flex;
-
         flex-wrap: nowrap;
-
         gap: 4px;
-
         margin-top: 6px;
     }
 
     .status-actions form {
         margin: 0;
-
         padding: 0;
     }
 
     .action-button {
         border: 0;
-
         border-radius: 5px;
-
         padding: 4px 6px;
-
         font-size: 9px;
-
         font-weight: 600;
-
         cursor: pointer;
-
         white-space: nowrap;
-
         line-height: 1.2;
     }
 
     .action-atendido {
         background: #dcfce7;
-
         color: #166534;
     }
 
@@ -539,7 +384,6 @@
 
     .action-cancelado {
         background: #fee2e2;
-
         color: #991b1b;
     }
 
@@ -549,7 +393,6 @@
 
     .action-nao-compareceu {
         background: #fef3c7;
-
         color: #92400e;
     }
 
@@ -557,179 +400,83 @@
         background: #fde68a;
     }
 
-
-    /* =========================
-       VAZIO
-    ========================= */
+    /* VAZIO */
 
     .empty {
         text-align: center;
-
         padding: 45px 20px;
-
         color: #6b7280;
-
         font-size: 14px;
     }
 
+    /* RESPONSIVIDADE */
 
-    /* =========================
-       RODAPÉ
-    ========================= */
-
-    .admin-footer {
-        text-align: center;
-
-        padding: 25px 20px;
-
-        color: #6b7280;
-
-        font-size: 12px;
+    @media (max-width: 1100px) {
+        .stats-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
     }
-
-
-    /* =========================
-       RESPONSIVO
-    ========================= */
 
     @media (max-width: 1000px) {
-
-        .stats-grid {
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
-        }
-
         .filters {
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
-
     }
 
-
     @media (max-width: 700px) {
-
-        .admin-header {
-            padding: 16px 18px;
-
-            align-items: flex-start;
-
-            flex-direction: column;
-        }
-
-        .admin-actions {
-            width: 100%;
-
-            justify-content:
-                space-between;
-
-            flex-wrap: wrap;
-        }
-
         .admin-container {
-            padding: 18px;
+            padding: 20px 14px;
         }
 
-        .stats-grid,
-        .today-grid,
+        .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 15px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+        }
+
+        .today-grid {
+            grid-template-columns: 1fr;
+        }
+
         .filters {
             grid-template-columns: 1fr;
         }
 
         .filter-actions {
-            display: grid;
-
-            grid-template-columns:
-                1fr 1fr;
+            flex-wrap: wrap;
         }
 
-        .button {
-            width: 100%;
+        .history-header {
+            align-items: flex-start;
+            flex-direction: column;
         }
 
+        .panel {
+            padding: 16px;
+        }
     }
 
+    @media (max-width: 400px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
-```
 
-</head>
 
-<body>
+<div class="admin-container">
 
-```
-<!-- =========================
-     CABEÇALHO
-========================== -->
-
-<header class="admin-header">
-
-    <div class="admin-title">
-
-        <h1>
-            Painel Administrativo
-        </h1>
-
-        <p>
-            Gerenciamento de agendamentos de RG
-        </p>
-
+    <div class="admin-page-heading">
+        <h1>Painel Administrativo</h1>
+        <p>Gerenciamento de agendamentos de RG</p>
     </div>
-
-
-    <div class="admin-actions">
-
-        <a
-            href="{{ url_for('admin.dashboard') }}"
-            class="header-button"
-        >
-            Dashboard
-        </a>
-    
-        <a
-            href="{{ url_for('admin.servicos') }}"
-            class="header-button"
-        >
-            Serviços
-        </a>
-    
-        <a
-            href="{{ url_for('admin.horarios') }}"
-            class="header-button"
-        >
-            Horários
-        </a>
-    
-        <a
-            href="{{ url_for('admin.administradores') }}"
-            class="header-button"
-        >
-            Administradores
-        </a>
-
-        <a
-            href="{{ url_for('admin.informacoes') }}"
-            class="header-button"
-        >
-            Informações
-        </a>
-
-        <a
-            class="logout-button"
-            href="{{ url_for('auth.logout') }}"
-        >
-            Sair
-        </a>
-    
-    </div>
-
-</header>
-
-
-<!-- =========================
-     CONTEÚDO
-========================== -->
-
-<main class="admin-container">
 
 
     <!-- INDICADORES -->
@@ -737,98 +484,45 @@
     <section class="stats-grid">
 
         <div class="stat-card">
-
-            <div class="stat-label">
-                Total de agendamentos
-            </div>
-
-            <div class="stat-value">
-                {{ total }}
-            </div>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <div class="stat-label">
-                Agendados
-            </div>
-
-            <div class="stat-value">
-                {{ agendados }}
-            </div>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <div class="stat-label">
-                Atendidos
-            </div>
-
-            <div class="stat-value">
-                {{ atendidos }}
-            </div>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <div class="stat-label">
-                Cancelados
-            </div>
-
-            <div class="stat-value">
-                {{ cancelados }}
-            </div>
-
+            <div class="stat-label">Total de agendamentos</div>
+            <div class="stat-value">{{ total }}</div>
         </div>
 
         <div class="stat-card">
+            <div class="stat-label">Agendados</div>
+            <div class="stat-value">{{ agendados }}</div>
+        </div>
 
-            <div class="stat-label">
-                Não compareceu
-            </div>
-        
-            <div class="stat-value">
-                {{ nao_compareceu }}
-            </div>
-        
+        <div class="stat-card">
+            <div class="stat-label">Atendidos</div>
+            <div class="stat-value">{{ atendidos }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Cancelados</div>
+            <div class="stat-value">{{ cancelados }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Não compareceu</div>
+            <div class="stat-value">{{ nao_compareceu }}</div>
         </div>
 
     </section>
 
 
-    <!-- HOJE -->
+    <!-- AGENDAMENTOS DE HOJE -->
 
     <section class="today-grid">
 
         <div class="today-card">
-
-            <h3>
-                Agendamentos de hoje
-            </h3>
-
-            <strong>
-                {{ hoje_total }}
-            </strong>
-
+            <h3>Agendamentos de hoje</h3>
+            <strong>{{ hoje_total }}</strong>
         </div>
 
-
         <div class="today-card">
-
-            <h3>
-                Atendidos hoje
-            </h3>
-
-            <strong>
-                {{ hoje_atendidos }}
-            </strong>
-
+            <h3>Atendidos hoje</h3>
+            <strong>{{ hoje_atendidos }}</strong>
         </div>
 
     </section>
@@ -838,22 +532,14 @@
 
     <section class="panel">
 
-        <h2 class="panel-title">
-            Histórico de Protocolos
-        </h2>
-
+        <h2 class="panel-title">Histórico de Protocolos</h2>
 
         <form method="get">
 
             <div class="filters">
 
-
                 <div class="field">
-
-                    <label for="protocolo">
-                        Protocolo
-                    </label>
-
+                    <label for="protocolo">Protocolo</label>
                     <input
                         id="protocolo"
                         name="protocolo"
@@ -861,16 +547,10 @@
                         value="{{ protocolo }}"
                         placeholder="Ex.: UAUA-20260928"
                     >
-
                 </div>
 
-
                 <div class="field">
-
-                    <label for="cpf">
-                        CPF
-                    </label>
-
+                    <label for="cpf">CPF</label>
                     <input
                         id="cpf"
                         name="cpf"
@@ -878,137 +558,74 @@
                         value="{{ cpf }}"
                         placeholder="Digite o CPF"
                     >
-
                 </div>
 
-
                 <div class="field">
+                    <label for="servico_id">Serviço</label>
+                    <select id="servico_id" name="servico_id">
 
-                    <label for="servico_id">
-                        Serviço
-                    </label>
-
-                    <select
-                        id="servico_id"
-                        name="servico_id"
-                    >
-
-                        <option value="">
-                            Todos os serviços
-                        </option>
+                        <option value="">Todos os serviços</option>
 
                         {% for servico in servicos %}
-
                             <option
                                 value="{{ servico.id }}"
-                                {% if servico_id|int == servico.id %}
-                                selected
-                                {% endif %}
+                                {% if servico_id|int == servico.id %}selected{% endif %}
                             >
                                 {{ servico.nome }}
                             </option>
-
                         {% endfor %}
 
                     </select>
-
                 </div>
 
-
                 <div class="field">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
 
-                    <label for="status">
-                        Status
-                    </label>
+                        <option value="">Todos os status</option>
 
-                    <select
-                        id="status"
-                        name="status"
-                    >
-
-                        <option value="">
-                            Todos os status
-                        </option>
-
-                        <option
-                            value="agendado"
-                            {% if status == "agendado" %}
-                            selected
-                            {% endif %}
-                        >
+                        <option value="agendado" {% if status == "agendado" %}selected{% endif %}>
                             Agendado
                         </option>
 
-                        <option
-                            value="atendido"
-                            {% if status == "atendido" %}
-                            selected
-                            {% endif %}
-                        >
+                        <option value="atendido" {% if status == "atendido" %}selected{% endif %}>
                             Atendido
                         </option>
 
-                        <option
-                            value="cancelado"
-                            {% if status == "cancelado" %}
-                            selected
-                            {% endif %}
-                        >
+                        <option value="cancelado" {% if status == "cancelado" %}selected{% endif %}>
                             Cancelado
                         </option>
 
-                        <option
-                            value="nao_compareceu"
-                            {% if status == "nao_compareceu" %}
-                            selected
-                            {% endif %}
-                        >
+                        <option value="nao_compareceu" {% if status == "nao_compareceu" %}selected{% endif %}>
                             Não compareceu
                         </option>
 
                     </select>
-
                 </div>
 
-
                 <div class="field">
-
-                    <label for="data_inicio">
-                        Data inicial
-                    </label>
-
+                    <label for="data_inicio">Data inicial</label>
                     <input
                         id="data_inicio"
                         name="data_inicio"
                         type="date"
                         value="{{ data_inicio }}"
                     >
-
                 </div>
 
-
                 <div class="field">
-
-                    <label for="data_fim">
-                        Data final
-                    </label>
-
+                    <label for="data_fim">Data final</label>
                     <input
                         id="data_fim"
                         name="data_fim"
                         type="date"
                         value="{{ data_fim }}"
                     >
-
                 </div>
-
 
                 <div class="filter-actions">
 
-                    <button
-                        type="submit"
-                        class="button button-primary"
-                    >
+                    <button type="submit" class="button button-primary">
                         Pesquisar
                     </button>
 
@@ -1028,26 +645,19 @@
     </section>
 
 
-    <!-- TABELA -->
+    <!-- TABELA DE PROTOCOLOS -->
 
     <section class="panel">
 
         <div class="history-header">
 
-            <h2 class="panel-title">
-                Protocolos
-            </h2>
+            <h2 class="panel-title">Protocolos</h2>
 
             <span class="history-count">
-
-                {{ total_filtrado }}
-
-                registro(s) encontrado(s)
-
+                {{ total_filtrado }} registro(s) encontrado(s)
             </span>
 
         </div>
-
 
         <div class="table-wrapper">
 
@@ -1056,41 +666,16 @@
                 <table>
 
                     <thead>
-
                         <tr>
-
-                            <th>
-                                Protocolo
-                            </th>
-
-                            <th>
-                                Data
-                            </th>
-
-                            <th>
-                                Horário
-                            </th>
-
-                            <th>
-                                Nome
-                            </th>
-
-                            <th>
-                                CPF
-                            </th>
-
-                            <th>
-                                Serviço
-                            </th>
-
-                            <th>
-                                Status / Ações
-                            </th>
-
+                            <th>Protocolo</th>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Nome</th>
+                            <th>CPF</th>
+                            <th>Serviço</th>
+                            <th>Status / Ações</th>
                         </tr>
-
                     </thead>
-
 
                     <tbody>
 
@@ -1124,107 +709,51 @@
 
                                 <td>
 
-
                                     {% if agendamento.status == "agendado" %}
 
                                         <span class="status status-agendado">
                                             Agendado
                                         </span>
 
-
                                         <div class="status-actions">
 
-
                                             <form
                                                 method="post"
-                                                action="{{ url_for(
-                                                    'admin.alterar_status',
-                                                    agendamento_id=agendamento.id
-                                                ) }}"
+                                                action="{{ url_for('admin.alterar_status', agendamento_id=agendamento.id) }}"
                                             >
-                                               
-                                                <input
-                                                    type="hidden"
-                                                    name="status"
-                                                    value="atendido"
-                                                >
-                                                <input
-                                                    type="hidden"
-                                                    name="csrf_token"
-                                                    value="{{ csrf_token() }}"
-                                                >
+                                                <input type="hidden" name="status" value="atendido">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                                                <button
-                                                    type="submit"
-                                                    class="action-button action-atendido"
-                                                >
+                                                <button type="submit" class="action-button action-atendido">
                                                     Atendido
                                                 </button>
-
                                             </form>
-
 
                                             <form
                                                 method="post"
-                                                action="{{ url_for(
-                                                    'admin.alterar_status',
-                                                    agendamento_id=agendamento.id
-                                                ) }}"
+                                                action="{{ url_for('admin.alterar_status', agendamento_id=agendamento.id) }}"
                                             >
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <input type="hidden" name="status" value="cancelado">
 
-                                                <input
-                                                    type="hidden"
-                                                    name="csrf_token"
-                                                    value="{{ csrf_token() }}"
-                                                >
-                                                
-                                                <input
-                                                    type="hidden"
-                                                    name="status"
-                                                    value="cancelado"
-                                                >
-
-                                                <button
-                                                    type="submit"
-                                                    class="action-button action-cancelado"
-                                                >
+                                                <button type="submit" class="action-button action-cancelado">
                                                     Cancelar
                                                 </button>
-
                                             </form>
-
 
                                             <form
                                                 method="post"
-                                                action="{{ url_for(
-                                                    'admin.alterar_status',
-                                                    agendamento_id=agendamento.id
-                                                ) }}"
+                                                action="{{ url_for('admin.alterar_status', agendamento_id=agendamento.id) }}"
                                             >
+                                                <input type="hidden" name="status" value="nao_compareceu">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                                                <input
-                                                    type="hidden"
-                                                    name="status"
-                                                    value="nao_compareceu"
-                                                >
-                                                <input
-                                                    type="hidden"
-                                                    name="csrf_token"
-                                                    value="{{ csrf_token() }}"
-                                                >
-
-                                                <button
-                                                    type="submit"
-                                                    class="action-button action-nao-compareceu"
-                                                >
+                                                <button type="submit" class="action-button action-nao-compareceu">
                                                     Não compareceu
                                                 </button>
-
                                             </form>
 
-
                                         </div>
-
 
                                     {% elif agendamento.status == "atendido" %}
 
@@ -1232,20 +761,17 @@
                                             Atendido
                                         </span>
 
-
                                     {% elif agendamento.status == "cancelado" %}
 
                                         <span class="status status-cancelado">
                                             Cancelado
                                         </span>
 
-
                                     {% elif agendamento.status == "nao_compareceu" %}
 
                                         <span class="status status-nao-compareceu">
                                             Não compareceu
                                         </span>
-
 
                                     {% else %}
 
@@ -1254,7 +780,6 @@
                                         </span>
 
                                     {% endif %}
-
 
                                 </td>
 
@@ -1266,14 +791,10 @@
 
                 </table>
 
-
             {% else %}
 
                 <div class="empty">
-
-                    Nenhum agendamento encontrado
-                    com os filtros informados.
-
+                    Nenhum agendamento encontrado com os filtros informados.
                 </div>
 
             {% endif %}
@@ -1282,17 +803,6 @@
 
     </section>
 
-</main>
+</div>
 
-
-<footer class="admin-footer">
-
-    Secretaria de Desenvolvimento Social e Combate à Pobreza
-    · Prefeitura Municipal de Uauá
-
-</footer>
-```
-
-</body>
-
-</html>
+{% endblock %}

@@ -4,6 +4,11 @@
     Escolher data - {{ servico.nome }}
 {% endblock %}
 
+{% block header_actions %}
+    <a href="{{ url_for('public.agendamento') }}" class="btn-login">
+        Voltar
+    </a>
+{% endblock %}
 
 {% block content %}
 
@@ -328,27 +333,6 @@
     }
 
 </style>
-
-
-<header class="calendar-page-header">
-
-    <div class="container">
-
-        <div class="calendar-brand">
-            <span class="calendar-brand-title">SEDES</span>
-        </div>
-
-        <a
-            href="{{ url_for('public.agendamento') }}"
-            class="calendar-back"
-        >
-            Voltar
-        </a>
-
-    </div>
-
-</header>
-
 
 <section class="services">
 

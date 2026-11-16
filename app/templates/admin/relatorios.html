@@ -1,299 +1,348 @@
 
-<!DOCTYPE html>
-<html lang="pt-BR">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
+{% block title %}Relatórios - Painel Administrativo{% endblock %}
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+{% block content %}
 
-    <title>Relatórios - Agendamento RG</title>
+<style>
+    .relatorios-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 28px;
+    }
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/style.css') }}"
-    >
+    .relatorios-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+    }
 
-    <style>
-        * {
-            box-sizing: border-box;
+    .relatorios-header h1 {
+        margin: 0;
+        color: #111827;
+        font-size: 25px;
+    }
+
+    .relatorios-header p {
+        margin: 6px 0 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .relatorios-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .relatorios-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 16px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+        color: #374151;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+
+    .relatorios-button:hover {
+        background: #f3f4f6;
+    }
+
+    
+    
+    .relatorios-panel {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+
+    .relatorios-panel h2 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        color: #111827;
+    }
+
+    .relatorios-description {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .relatorios-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 24px;
+    }
+
+    .relatorios-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        background: #ffffff;
+    }
+
+    .relatorios-card h3 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: #6b7280;
+    }
+
+    .relatorios-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    @media (max-width: 900px) {
+        .relatorios-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 700px) {
+        .relatorios-page {
+            padding: 18px;
         }
 
-        body {
-            margin: 0;
-            background: #f5f7fa;
-            color: #1f2937;
-            font-family: Arial, Helvetica, sans-serif;
+        .relatorios-header {
+            align-items: flex-start;
+            flex-direction: column;
         }
 
-        .admin-header {
-            background: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 18px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
+        .relatorios-actions {
+            width: 100%;
         }
 
-        .admin-title h1 {
-            margin: 0;
-            font-size: 23px;
-            color: #111827;
+        .relatorios-button {
+            flex: 1;
         }
 
-        .admin-title p {
-            margin: 5px 0 0;
-            color: #6b7280;
-            font-size: 13px;
+        .relatorios-grid {
+            grid-template-columns: 1fr;
         }
 
-        .admin-actions {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 8px;
-            flex-wrap: wrap;
+        .relatorios-panel {
+            padding: 18px;
         }
-
-        .header-button,
-        .logout-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 38px;
-            padding: 0 12px;
-            border-radius: 8px;
-            border: 1px solid #d1d5db;
-            color: #374151;
-            background: #ffffff;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .header-button:hover,
-        .logout-button:hover {
-            background: #f3f4f6;
-        }
-
-        .admin-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 28px;
-        }
-
-        .panel {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-        }
-
-        .panel-title {
-            margin: 0 0 8px;
-            font-size: 20px;
-            color: #111827;
-        }
-
-        .panel-description {
-            margin: 0;
-            color: #6b7280;
-            font-size: 14px;
-        }
-
-        .report-grid {
+    }
+        .relatorios-filtros {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 18px;
-            margin-top: 24px;
+            gap: 16px;
+            margin-top: 20px;
         }
 
-        .report-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 20px;
+        .relatorios-campo {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .relatorios-campo label {
+            color: #374151;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .relatorios-campo input {
+            width: 100%;
+            min-height: 40px;
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            color: #374151;
             background: #ffffff;
-        }
-
-        .report-card h3 {
-            margin: 0 0 8px;
             font-size: 14px;
-            color: #6b7280;
         }
 
-        .report-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: #111827;
-        }
-
-        .admin-footer {
-            text-align: center;
-            padding: 25px 20px;
-            color: #6b7280;
-            font-size: 12px;
+        .relatorios-campo input:focus {
+            outline: none;
+            border-color: #6b7280;
         }
 
         @media (max-width: 900px) {
-            .report-grid {
+            .relatorios-filtros {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
 
-        @media (max-width: 700px) {
-            .admin-header {
-                padding: 16px 18px;
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .admin-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-
-            .admin-container {
-                padding: 18px;
-            }
-
-            .report-grid {
+        @media (max-width: 600px) {
+            .relatorios-filtros {
                 grid-template-columns: 1fr;
             }
         }
-    </style>
-</head>
+</style>
 
-<body>
+<div class="relatorios-page">
 
-<header class="admin-header">
+    <header class="relatorios-header">
 
-    <div class="admin-title">
+        <div>
+            <h1>Relatórios</h1>
 
-        <h1>
-            Relatórios
-        </h1>
+            <p>
+                Relatórios e indicadores de agendamentos de RG/CIN.
+            </p>
+        </div>
 
-        <p>
-            Relatórios e indicadores de agendamentos de RG
+        <div class="relatorios-actions">
+
+    <a
+        href="{{ url_for('admin.relatorios_pdf', **request.args.to_dict()) }}"
+        class="relatorios-button"
+    >
+        Baixar PDF
+    </a>
+
+    <a
+        href="{{ url_for('admin.relatorios_excel', **request.args.to_dict()) }}"
+        class="relatorios-button"
+    >
+        Baixar Excel
+    </a>
+
+    <a
+        href="{{ url_for('admin.administradores') }}"
+        class="relatorios-button"
+    >
+        Voltar
+    </a>
+
+</div>
+
+    </header>
+
+        <section class="relatorios-panel">
+
+        <h2>Filtrar relatórios</h2>
+
+        <p class="relatorios-description">
+            Informe os critérios para consultar os agendamentos.
         </p>
 
-    </div>
+        <form method="GET" action="{{ url_for('admin.relatorios') }}">
 
-    <div class="admin-actions">
+            <div class="relatorios-filtros">
 
-        <a
-            href="{{ url_for('admin.administradores') }}"
-            class="header-button"
-        >
-            ← Voltar
-        </a>
-    
-    </div>
+                <div class="relatorios-campo">
+                    <label for="data_inicio">Data inicial</label>
+                    <input
+                        type="date"
+                        id="data_inicio"
+                        name="data_inicio"
+                        value="{{ data_inicio }}"
+                    >
+                </div>
 
-</header>
+                <div class="relatorios-campo">
+                    <label for="data_fim">Data final</label>
+                    <input
+                        type="date"
+                        id="data_fim"
+                        name="data_fim"
+                        value="{{ data_fim }}"
+                    >
+                </div>
 
+                <div class="relatorios-campo">
+                    <label for="nome">Nome</label>
+                    <input
+                        type="text"
+                        id="nome"
+                        name="nome"
+                        placeholder="Digite o nome"
+                        value="{{ nome }}"
+                    >
+                </div>
 
-<main class="admin-container">
+                <div class="relatorios-campo">
+                    <label for="cpf">CPF</label>
+                    <input
+                        type="text"
+                        id="cpf"
+                        name="cpf"
+                        placeholder="Digite o CPF"
+                        value="{{ cpf }}"
+                    >
+                </div>
 
-    <section class="panel">
+            </div>
 
-        <h2 class="panel-title">
-            Relatórios de Atendimento
-        </h2>
+            <div class="relatorios-actions" style="margin-top: 18px;">
 
-        <p class="panel-description">
+                <button type="submit" class="relatorios-button">
+                    Filtrar
+                </button>
+
+                <a
+                    href="{{ url_for('admin.relatorios') }}"
+                    class="relatorios-button"
+                >
+                    Limpar filtros
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+    <section class="relatorios-panel">
+
+        <h2>Relatórios de Atendimento</h2>
+
+        <p class="relatorios-description">
             Área destinada à consulta de indicadores e relatórios
             dos atendimentos realizados.
         </p>
 
+        <div class="relatorios-grid">
 
-        <div class="report-grid">
-
-            <div class="report-card">
-
-                <h3>
-                    Total de agendamentos
-                </h3>
-
-                <div class="report-value">
-                    {{ total }}
-                </div>
-
+            <div class="relatorios-card">
+                <h3>Total de agendamentos</h3>
+                <div class="relatorios-value">{{ total }}</div>
             </div>
 
-            <div class="report-card">
-
-                <h3>
-                    Agendados
-                </h3>
-            
-                <div class="report-value">
-                    {{ agendados }}
-                </div>
-            
+            <div class="relatorios-card">
+                <h3>Agendados</h3>
+                <div class="relatorios-value">{{ agendados }}</div>
             </div>
 
-
-            <div class="report-card">
-
-                <h3>
-                    Atendidos
-                </h3>
-
-                <div class="report-value">
-                    {{ atendidos }}
-                </div>
-
+            <div class="relatorios-card">
+                <h3>Atendidos</h3>
+                <div class="relatorios-value">{{ atendidos }}</div>
             </div>
 
-
-            <div class="report-card">
-
-                <h3>
-                    Cancelados
-                </h3>
-
-                <div class="report-value">
-                    {{ cancelados }}
-                </div>
-
+            <div class="relatorios-card">
+                <h3>Cancelados</h3>
+                <div class="relatorios-value">{{ cancelados }}</div>
             </div>
 
-
-            <div class="report-card">
-
-                <h3>
-                    Não compareceu
-                </h3>
-
-                <div class="report-value">
-                    {{ nao_compareceu }}
-                </div>
-
+            <div class="relatorios-card">
+                <h3>Não compareceu</h3>
+                <div class="relatorios-value">{{ nao_compareceu }}</div>
             </div>
 
         </div>
 
     </section>
 
-</main>
+</div>
 
-
-<footer class="admin-footer">
-
-    Secretaria de Desenvolvimento Social e Combate à Pobreza
-    · Prefeitura Municipal de Uauá
-
-</footer>
-
-</body>
-
-</html>
-
+{% endblock %}

@@ -65,25 +65,41 @@
   }
 
   .brand-title {
-
     background: linear-gradient(
-      90deg,
-      var(--primary),
-      var(--accent)
+        90deg,
+        #009739,
+        #FFDF00,
+        #009739,
+        #002776,
+        #009739
     );
-
+    background-size: 300% 100%;
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
-    background-clip: text;
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: 2px;
 
-    font-size: 25px;
+    animation: sedes-gradient 12s ease-in-out infinite;
 
-    font-weight: 800;
+    filter: drop-shadow(0 1px 2px rgba(0, 39, 118, 0.18));
+}
 
-    letter-spacing: 1px;
+@keyframes sedes-gradient {
+    0% {
+        background-position: 0% 50%;
+    }
 
-  }
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
 
   .brand-subtitle {
   color: var(--muted);
@@ -177,11 +193,6 @@
   .btn-secondary {
   border: 1px solid rgba(255, 255, 255, 0.4);
   color: var(--white);
-  }
-
-  .btn-primary:hover,
-  .btn-secondary:hover {
-  opacity: 0.88;
   }
 
   /* =========================
@@ -405,3 +416,330 @@
 
 
   }
+  
+/* =========================
+   AJUSTE FINAL DO RODAPÉ
+========================= */
+
+.footer .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 260px;
+    row-gap:2px;
+    width: 100%;
+    max-width: 1350px;
+    padding: 0 35px;
+    margin: 0 auto;
+}
+
+.footer .footer-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap:2px;
+    min-width: 0;
+}
+
+.footer .footer-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    line-height: 1.35;
+    margin: 0;
+}
+
+.footer .footer-info i {
+    width: 16px;
+    flex-shrink: 0;
+    margin-top: 3px;
+    text-align: center;
+}
+
+/* Aproxima as informações de desenvolvimento */
+.footer .footer-divider {
+    width: calc(100% - 70px);
+    max-width: 1150px;
+    height: 1px;
+    margin: 4px auto;  
+    background: rgba(255, 255, 255, 0.18);  
+}
+
+.footer-divider + .footer-grid {
+    margin-top: 0;
+}
+
+/* Direitos autorais no final do rodapé */
+.footer-copyright {
+    width: 100%;
+    margin: 12px auto 0;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    text-align: center;
+    white-space: nowrap;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+@media (max-width: 600px) {
+    .footer-copyright {
+        font-size: 10px;
+        white-space: normal;
+    }
+}
+
+@media (max-width: 600px) {
+    .footer .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 0;
+    }
+
+    .footer .footer-divider {
+        width: 100%;
+    }
+}
+
+
+/* =========================
+   ORIENTAÇÕES AOS CIDADÃOS
+========================= */
+
+.orientacoes-lista {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 22px;
+}
+
+.orientacao-card {
+    min-height: auto;
+    padding: 32px;
+}
+
+.orientacao-card h3 {
+    color: var(--primary);
+    font-size: 22px;
+    margin-bottom: 16px;
+}
+
+.orientacao-conteudo {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+    white-space: pre-line;
+}
+
+.orientacao-card > p {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.orientacao-itens {
+    padding-left: 22px;
+    margin: 0;
+}
+
+.orientacao-itens li {
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+    padding-left: 5px;
+    margin-bottom: 9px;
+}
+
+.orientacao-itens li::marker {
+    color: var(--accent);
+}
+
+.orientacao-aviso {
+    margin-top: 20px;
+    padding: 16px 18px;
+    background: #eef5f8;
+    border-left: 4px solid var(--accent);
+    border-radius: 5px;
+    color: var(--primary-dark);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.orientacao-aviso strong {
+    color: var(--primary);
+}
+
+.orientacoes-acao {
+    margin-top: 38px;
+    text-align: center;
+}
+
+.orientacoes-acao > p {
+    color: var(--muted);
+    margin-bottom: 18px;
+    font-size: 15px;
+}
+
+.orientacoes-acao .hero-buttons {
+    justify-content: center;
+}
+
+.btn-orientacao-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 22px;
+    border-radius: 6px;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+@media (max-width: 520px) {
+
+    .orientacao-card {
+        padding: 22px;
+    }
+
+    .orientacao-card h3 {
+        font-size: 19px;
+    }
+
+    .orientacao-itens li {
+        font-size: 14px;
+    }
+
+    .orientacao-aviso {
+        font-size: 13px;
+    }
+
+}
+
+
+/* =========================
+   CABEÇALHO FIXO E BOTÃO SERVIDOR
+========================= */
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #ffffff;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+.topbar-content {
+    align-items: center;
+}
+
+/* Ajuste para telas de celular */
+@media (max-width: 520px) {
+
+    .topbar-content {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .header-actions .btn-login {
+        width: auto;
+        white-space: nowrap;
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+
+    .brand-title {
+        font-size: 30px;
+    }
+
+}
+
+/* =========================
+   DIVISÓRIA COM CORES DO BRASIL
+========================= */
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(
+        90deg,
+        #009739 0%,
+        #36a85b 28%,
+        #ffdf00 50%,
+        #002776 75%,
+        #009739 100%
+    ) 1;
+}
+/* Efeito uniforme nos botões de agendamento */
+
+.btn-primary,
+.btn-secondary,
+.btn-orientacao-secondary {
+    transition: opacity 0.2s ease;
+}
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-orientacao-secondary:hover {
+    opacity: 0.88;
+}
+
+/* PADRONIZAÇÃO DOS DOIS BOTÕES DO FINAL DA PÁGINA */
+
+.orientacoes-acao .btn-primary,
+.orientacoes-acao .btn-orientacao-secondary {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+/* EFEITO AO PASSAR O MOUSE */
+.orientacoes-acao .btn-primary:hover,
+.orientacoes-acao .btn-orientacao-secondary:hover {
+    background: var(--primary);
+    color: var(--white);
+    border: 1px solid var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 12px rgba(18, 59, 93, 0.18);
+}
+
+/* EFEITO AO CLICAR */
+.orientacoes-acao .btn-primary:active,
+.orientacoes-acao .btn-orientacao-secondary:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Centralização definitiva dos direitos autorais */
+.footer .footer-copyright {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 15px 0 0 0 !important;
+    padding: 10px 5px 0 !important;
+    box-sizing: border-box;
+    text-align: center !important;
+    white-space: nowrap;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+    .footer .footer-copyright {
+        white-space: normal;
+        font-size: 11px;
+    }
+}

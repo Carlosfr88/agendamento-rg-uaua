@@ -1,187 +1,138 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <title>Agendamento RG/CIN - SEDES Uauá</title>
+{% block title %}
+Agendamento RG/CIN - SEDES Uauá
+{% endblock %}
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+{% block header_actions %}
+<a href="{{ url_for('auth.login') }}" class="btn-login">
+    <i class="fa-solid fa-user-lock"></i>
+    Área do Servidor
+</a>
+{% endblock %}
 
-<body>
+{% block content %}
 
-<header class="topbar">
-    <div class="container topbar-content">
+<section class="hero">
+    <div class="container hero-content">
+        <div class="hero-text">
 
-        <div class="brand">
-            <span class="brand-title">SEDES</span>
+            <span class="eyebrow">
+                PREFEITURA MUNICIPAL DE UAUÁ
+            </span>
+
+            <h1>
+                Agendamento de RG/CIN
+            </h1>
+
+            <p>
+                Agende seu atendimento para emissão ou atualização
+                do seu documento de identificação de forma rápida,
+                simples e segura.
+            </p>
+
+            <div class="hero-buttons">
+
+                <a href="{{ url_for('public.agendamento') }}"
+                   class="btn-primary">
+                    Novo Agendamento
+                </a>
+
+                <a href="{{ url_for('public.consultar_agendamento') }}"
+                   class="btn-secondary">
+                    Consultar Agendamento
+                </a>
+
+            </div>
 
         </div>
-
-
     </div>
-</header>
+</section>
 
 
-<main>
-
-    <section class="hero">
-        <div class="container hero-content">
-
-            <div class="hero-text">
-
-                <span class="eyebrow">
-                    PREFEITURA MUNICIPAL DE UAUÁ
-                </span>
-
-                <h1>
-                    Agendamento de RG/CIN
-                </h1>
-
-                <p>
-                    Agende seu atendimento para emissão ou atualização
-                    do seu documento de identificação de forma rápida,
-                    simples e segura.
-                </p>
-
-                <div class="hero-buttons">
-
-                    <a href="{{ url_for('public.agendamento') }}"
-                       class="btn-primary">
-                        Novo Agendamento
-                    </a>
-
-                    <a href="{{ url_for('public.consultar_agendamento') }}"
-                       class="btn-secondary">
-                        Consultar Agendamento
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-    </section>
-
-
-    <section class="services">
-
-        <div class="container">
-
-            <div class="section-header">
-
-                <span class="eyebrow">
-                    SERVIÇOS
-                </span>
-
-                <h2>
-                    Atendimento de RG/CIN
-                </h2>
-
-                <p>
-                    Informações sobre o atendimento e o agendamento.
-                </p>
-
-            </div>
-
-
-            <div class="cards">
-
-                <div class="card">
-
-                    <div class="card-icon">
-                        01
-                    </div>
-
-                    <h3>
-                        Documentos Necessários
-                    </h3>
-
-                    <p>
-                        Confira previamente os documentos necessários
-                        e as orientações importantes para o atendimento.
-                    </p>
-
-                    <a href="{{ url_for('public.informacoes') }}"
-                    class="card-link">
-                        Ver documentos →
-                    </a>
-
-                </div>
-
-
-                <div class="card">
-
-                    <div class="card-icon">
-                        02
-                    </div>
-
-                    <h3>
-                        Novo Agendamento
-                    </h3>
-
-                    <p>
-                        Escolha a data e o horário disponíveis
-                        para realizar seu atendimento de emissão
-                        ou atualização do documento.
-                    </p>
-
-                </div>
-
-
-                <div class="card">
-
-                    <div class="card-icon">
-                        03
-                    </div>
-
-                    <h3>
-                        Consultar Agendamento
-                    </h3>
-
-                    <p>
-                        Consulte os dados, a data e o horário
-                        do seu atendimento utilizando o protocolo
-                        recebido após o agendamento.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    </section>
-
-</main>
-
-<footer class="footer">
+<section class="services orientacoes">
 
     <div class="container">
 
-        <strong>
-            Prefeitura Municipal de Uauá
-        </strong>
+        <div class="section-header">
 
-        <span>
-            Secretaria de Desenvolvimento Social e Combate à Pobreza
-        </span>
+            <span class="eyebrow">
+                ORIENTAÇÕES E AVISOS
+            </span>
 
-        <span>
-            Avenida João Borges de Sá — próximo à garagem da Prefeitura
-        </span>
+            <h2>
+                Orientações e Avisos aos Cidadãos
+            </h2>
 
-        <span>
-            Atendimento por ordem de chegada
-        </span>
+            <p>
+                Confira atentamente as informações abaixo antes
+                de comparecer ao atendimento para emissão da
+                Carteira de Identidade Nacional (CIN).
+            </p>
+
+        </div>
+
+
+        
+    <div class="orientacoes-lista">
+
+        {% for informacao in informacoes %}
+
+        <article class="card orientacao-card">
+
+            <div class="card-icon">
+                {{ "%02d"|format(loop.index) }}
+            </div>
+
+            <h3>
+                {{ informacao.titulo }}
+            </h3>
+
+            <p class="orientacao-conteudo">{{ informacao.conteudo }}</p>
+
+        </article>
+
+        {% else %}
+
+        <article class="card orientacao-card">
+            <h3>Informações indisponíveis</h3>
+            <p class="orientacao-conteudo">
+                No momento não há orientações disponíveis.
+            </p>
+        </article>
+
+        {% endfor %}
 
     </div>
 
-</footer>
 
-</body>
-</html>
+            
+        <div class="orientacoes-acao">
+
+            <p>
+                Após conferir as orientações, você já pode
+                realizar seu agendamento.
+            </p>
+
+            <div class="hero-buttons">
+
+                <a href="{{ url_for('public.agendamento') }}"
+                   class="btn-primary">
+                    Novo Agendamento
+                </a>
+
+                <a href="{{ url_for('public.consultar_agendamento') }}"
+                   class="btn-orientacao-secondary">
+                    Consultar Agendamento
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

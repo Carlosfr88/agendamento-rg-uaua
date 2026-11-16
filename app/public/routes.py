@@ -176,8 +176,19 @@ def data_bloqueada(servico_id, data):
 @public_bp.route("/")
 def index():
 
+    informacoes = (
+        Informacao.query
+        .filter_by(ativo=True)
+        .order_by(
+            Informacao.ordem.asc(),
+            Informacao.id.asc()
+        )
+        .all()
+    )
+
     return render_template(
-        "public/index.html"
+        "public/index.html",
+        informacoes=informacoes
     )
 
 

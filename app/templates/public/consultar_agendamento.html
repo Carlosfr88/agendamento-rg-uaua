@@ -1,286 +1,237 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
 
-<head>
+{% extends "base.html" %}
 
-    <meta charset="UTF-8">
+{% block title %}Consultar Agendamento - SEDES Uauá{% endblock %}
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+{% block header_actions %}
+<a href="{{ url_for('public.index') }}" class="btn-login">
+        Voltar
+</a>
+{% endblock %}
 
-    <title>
-        Consultar Agendamento - SEDES Uauá
-    </title>
+{% block content %}
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+    .consult-wrapper {
+        max-width: 750px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
 
-    <style>
+    .consult-card {
+        background: #ffffff;
+        border: 1px solid #e1e6eb;
+        border-radius: 12px;
+        padding: 30px;
+    }
 
+    .consult-header {
+        margin-bottom: 25px;
+    }
+
+    .consult-header h1 {
+        margin: 0 0 8px;
+        color: #123b5d;
+    }
+
+    .consult-header p {
+        margin: 0;
+        color: #65717d;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 7px;
+        color: #17212b;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .form-group input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 13px 14px;
+        border: 1px solid #d8dfe5;
+        border-radius: 8px;
+        font-size: 15px;
+        outline: none;
+    }
+
+    .form-group input:focus {
+        border-color: #1f7a8c;
+        box-shadow: 0 0 0 3px rgba(31, 122, 140, 0.10);
+    }
+
+    .btn-consult {
+        width: 100%;
+        border: none;
+        padding: 13px;
+        border-radius: 8px;
+        background: #123b5d;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .btn-consult:hover {
+        background: #0b2941;
+    }
+
+    .error-message {
+        margin-bottom: 20px;
+        padding: 13px 15px;
+        border-radius: 8px;
+        background: #fff1f1;
+        border: 1px solid #f0caca;
+        color: #9b2c2c;
+        font-size: 14px;
+    }
+
+    .result {
+        margin-top: 30px;
+        border-top: 1px solid #e1e6eb;
+        padding-top: 25px;
+    }
+
+    .result-title {
+        color: #123b5d;
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .protocol-box {
+        background: #f5f7fa;
+        border: 1px solid #e1e6eb;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .protocol-label {
+        display: block;
+        color: #65717d;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .protocol {
+        color: #123b5d;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .details {
+        border: 1px solid #e1e6eb;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .detail {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 14px 16px;
+        border-bottom: 1px solid #eef1f3;
+    }
+
+    .detail:last-child {
+        border-bottom: none;
+    }
+
+    .detail span {
+        color: #65717d;
+    }
+
+    .detail strong {
+        color: #17212b;
+        text-align: right;
+    }
+
+    .status {
+        color: #1f7a8c !important;
+    }
+
+    .cancel-box {
+        margin-top: 22px;
+        padding: 18px;
+        border: 1px solid #f0caca;
+        border-radius: 10px;
+        background: #fff8f8;
+    }
+
+    .cancel-title {
+        margin-bottom: 7px;
+        color: #8f2525;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .cancel-text {
+        margin: 0 0 15px;
+        color: #6f3b3b;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .btn-cancel {
+        width: 100%;
+        border: none;
+        padding: 13px;
+        border-radius: 8px;
+        background: #b42318;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-cancel:hover {
+        background: #8f1c13;
+    }
+
+    .cancelled-message {
+        margin-top: 22px;
+        padding: 15px;
+        border-radius: 8px;
+        background: #fff4e5;
+        border: 1px solid #f2d29b;
+        color: #7a4b00;
+        font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
         .consult-wrapper {
-            max-width: 750px;
-            margin: 40px auto;
-            padding: 0 20px;
+            margin: 25px auto;
+            padding: 0 12px;
         }
 
         .consult-card {
-            background: #ffffff;
-            border: 1px solid #e1e6eb;
-            border-radius: 12px;
-            padding: 30px;
-        }
-
-        .consult-header {
-            margin-bottom: 25px;
-        }
-
-        .consult-header h1 {
-            margin: 0 0 8px;
-            color: #123b5d;
-        }
-
-        .consult-header p {
-            margin: 0;
-            color: #65717d;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 7px;
-            color: #17212b;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .form-group input {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 13px 14px;
-            border: 1px solid #d8dfe5;
-            border-radius: 8px;
-            font-size: 15px;
-            outline: none;
-        }
-
-        .form-group input:focus {
-            border-color: #1f7a8c;
-            box-shadow:
-                0 0 0 3px
-                rgba(31, 122, 140, 0.10);
-        }
-
-        .btn-consult {
-            width: 100%;
-            border: none;
-            padding: 13px;
-            border-radius: 8px;
-            background: #123b5d;
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .btn-consult:hover {
-            background: #0b2941;
-        }
-
-        .error-message {
-            margin-bottom: 20px;
-            padding: 13px 15px;
-            border-radius: 8px;
-            background: #fff1f1;
-            border: 1px solid #f0caca;
-            color: #9b2c2c;
-            font-size: 14px;
-        }
-
-        .result {
-            margin-top: 30px;
-            border-top: 1px solid #e1e6eb;
-            padding-top: 25px;
-        }
-
-        .result-title {
-            color: #123b5d;
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .protocol-box {
-            background: #f5f7fa;
-            border: 1px solid #e1e6eb;
-            border-radius: 10px;
-            padding: 18px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .protocol-label {
-            display: block;
-            color: #65717d;
-            font-size: 12px;
-            margin-bottom: 6px;
-        }
-
-        .protocol {
-            color: #123b5d;
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-
-        .details {
-            border: 1px solid #e1e6eb;
-            border-radius: 10px;
-            overflow: hidden;
+            padding: 20px;
         }
 
         .detail {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            padding: 14px 16px;
-            border-bottom: 1px solid #eef1f3;
-        }
-
-        .detail:last-child {
-            border-bottom: none;
-        }
-
-        .detail span {
-            color: #65717d;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .detail strong {
-            color: #17212b;
-            text-align: right;
+            text-align: left;
         }
 
-        .status {
-            color: #1f7a8c !important;
+        .protocol {
+            font-size: 20px;
         }
-
-        .cancel-box {
-            margin-top: 22px;
-            padding: 18px;
-            border: 1px solid #f0caca;
-            border-radius: 10px;
-            background: #fff8f8;
-        }
-
-        .cancel-title {
-            margin-bottom: 7px;
-            color: #8f2525;
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .cancel-text {
-            margin: 0 0 15px;
-            color: #6f3b3b;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .btn-cancel {
-            width: 100%;
-            border: none;
-            padding: 13px;
-            border-radius: 8px;
-            background: #b42318;
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .btn-cancel:hover {
-            background: #8f1c13;
-        }
-
-        .cancelled-message {
-            margin-top: 22px;
-            padding: 15px;
-            border-radius: 8px;
-            background: #fff4e5;
-            border: 1px solid #f2d29b;
-            color: #7a4b00;
-            font-size: 14px;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: #123b5d;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        @media (max-width: 600px) {
-
-            .consult-wrapper {
-                margin: 25px auto;
-                padding: 0 12px;
-            }
-
-            .consult-card {
-                padding: 20px;
-            }
-
-            .detail {
-                flex-direction: column;
-                gap: 4px;
-            }
-
-            .detail strong {
-                text-align: left;
-            }
-
-            .protocol {
-                font-size: 20px;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-<header class="topbar">
-
-    <div class="container topbar-content">
-
-        <div class="brand">
-
-            <span class="brand-title">
-                SEDES
-            </span>
-
-        </div>
-
-        <a href="{{ url_for('public.index') }}"
-           class="btn-login">
-
-            Início
-
-        </a>
-
-    </div>
-
-</header>
-
-
-<main>
+    }
+</style>
 
 <section class="services">
 
@@ -290,12 +241,9 @@
 
             <div class="consult-card">
 
-
                 <div class="consult-header">
 
-                    <h1>
-                        Consultar Agendamento
-                    </h1>
+                    <h1>Consultar Agendamento</h1>
 
                     <p>
                         Informe seu protocolo e CPF
@@ -304,29 +252,18 @@
 
                 </div>
 
-
                 {% if erro %}
-
                     <div class="error-message">
-
                         {{ erro }}
-
                     </div>
-
                 {% endif %}
 
-
                 <form method="POST"
-                      action="{{ url_for(
-                          'public.consultar_agendamento'
-                      ) }}">
-
+                      action="{{ url_for('public.consultar_agendamento') }}">
 
                     <div class="form-group">
 
-                        <label for="protocolo">
-                            Protocolo
-                        </label>
+                        <label for="protocolo">Protocolo</label>
 
                         <input
                             type="text"
@@ -337,6 +274,7 @@
                             value="{{ request.form.get('protocolo', '') }}"
                             required
                         >
+
                         <input
                             type="hidden"
                             name="csrf_token"
@@ -345,12 +283,9 @@
 
                     </div>
 
-
                     <div class="form-group">
 
-                        <label for="cpf">
-                            CPF
-                        </label>
+                        <label for="cpf">CPF</label>
 
                         <input
                             type="text"
@@ -365,31 +300,19 @@
 
                     </div>
 
-
-                    <button
-                        type="submit"
-                        class="btn-consult">
-
+                    <button type="submit" class="btn-consult">
                         Consultar agendamento
-
                     </button>
-
 
                 </form>
 
-
                 {% if agendamento %}
-
 
                     <div class="result">
 
-
                         <div class="result-title">
-
                             Agendamento encontrado
-
                         </div>
-
 
                         <div class="protocol-box">
 
@@ -398,105 +321,59 @@
                             </span>
 
                             <span class="protocol">
-
                                 {{ agendamento.protocolo }}
-
                             </span>
 
                         </div>
 
-
                         <div class="details">
 
-
                             <div class="detail">
-
-                                <span>
-                                    Nome
-                                </span>
-
-                                <strong>
-                                    {{ agendamento.nome }}
-                                </strong>
-
+                                <span>Nome</span>
+                                <strong>{{ agendamento.nome }}</strong>
                             </div>
 
-
                             <div class="detail">
-
-                                <span>
-                                    Serviço
-                                </span>
-
-                                <strong>
-                                    {{ agendamento.servico.nome }}
-                                </strong>
-
+                                <span>Serviço</span>
+                                <strong>{{ agendamento.servico.nome }}</strong>
                             </div>
 
-
                             <div class="detail">
-
-                                <span>
-                                    Data
-                                </span>
-
+                                <span>Data</span>
                                 <strong>
                                     {{ agendamento.data.strftime('%d/%m/%Y') }}
                                 </strong>
-
                             </div>
 
-
                             <div class="detail">
-
-                                <span>
-                                    Horário
-                                </span>
-
+                                <span>Horário</span>
                                 <strong>
                                     {{ agendamento.horario.strftime('%H:%M') }}
                                 </strong>
-
                             </div>
-
 
                             <div class="detail">
-
-                                <span>
-                                    Status
-                                </span>
-
+                                <span>Status</span>
                                 <strong class="status">
-
                                     {{ agendamento.status|capitalize }}
-
                                 </strong>
-
                             </div>
 
-
                         </div>
-
 
                         {% if agendamento.status == "agendado" %}
 
                             <div class="cancel-box">
 
                                 <div class="cancel-title">
-
                                     Cancelar agendamento
-
                                 </div>
 
                                 <p class="cancel-text">
-
                                     Se você não puder comparecer,
                                     poderá cancelar este agendamento.
                                     A vaga será liberada para outra pessoa.
-
                                 </p>
-
 
                                 <form
                                     method="POST"
@@ -514,6 +391,7 @@
                                         name="protocolo"
                                         value="{{ agendamento.protocolo }}"
                                     >
+
                                     <input
                                         type="hidden"
                                         name="csrf_token"
@@ -526,13 +404,8 @@
                                         value="{{ agendamento.cpf }}"
                                     >
 
-
-                                    <button
-                                        type="submit"
-                                        class="btn-cancel">
-
+                                    <button type="submit" class="btn-cancel">
                                         Cancelar agendamento
-
                                     </button>
 
                                 </form>
@@ -542,28 +415,15 @@
                         {% elif agendamento.status == "cancelado" %}
 
                             <div class="cancelled-message">
-
                                 Este agendamento já foi cancelado.
                                 A vaga foi liberada para outro cidadão.
-
                             </div>
 
                         {% endif %}
 
-
                     </div>
 
-
                 {% endif %}
-
-
-                <a href="{{ url_for('public.index') }}"
-                   class="back-link">
-
-                    ← Voltar para página inicial
-
-                </a>
-
 
             </div>
 
@@ -573,34 +433,4 @@
 
 </section>
 
-</main>
-
-
-<footer class="footer">
-
-    <div class="container">
-
-        <strong>
-            Prefeitura Municipal de Uauá
-        </strong>
-
-        <span>
-            Secretaria de Desenvolvimento Social e Combate à Pobreza
-        </span>
-
-        <span>
-            Avenida João Borges de Sá — próximo à garagem da Prefeitura
-        </span>
-
-        <span>
-            Atendimento por ordem de chegada
-        </span>
-
-    </div>
-
-</footer>
-
-
-</body>
-
-</html>
+{% endblock %}
