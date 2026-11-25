@@ -26,8 +26,6 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(admin_bp)
 
-    with app.app_context():
-        from . import models
-        db.create_all()
+    from . import models
 
     return app
